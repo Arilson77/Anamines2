@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha de Anamnese — Atendimento Psicanalítico</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f7f3ee;
+    --warm-white: #fdfaf6;
+    --ink: #1c1917;
+    --ink-light: #44403c;
+    --ink-muted: #78716c;
+    --sage: #7c9a8a;
+    --sage-light: #a8c0b0;
+    --sage-pale: #e8f0eb;
+    --terracotta: #b5694d;
+    --terracotta-pale: #f5ebe5;
+    --gold: #c9a96e;
+    --gold-pale: #f5eddc;
+    --border: #d6cfc7;
+    --border-focus: #7c9a8a;
+    --shadow: rgba(28, 25, 23, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Header */
+  .header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(124, 154, 138, 0.12);
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: rgba(201, 169, 110, 0.08);
+  }
+
+  .header-symbol {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    color: var(--sage-light);
+    letter-spacing: 0.3em;
+    display: block;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .header-sub {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sage-light);
+    margin-top: 0.8rem;
+    font-weight: 400;
+  }
+
+  .header-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 1.2rem auto 0;
+    opacity: 0.6;
+  }
+
+  /* Privacy note */
+  .privacy-note {
+    background: var(--gold-pale);
+    border-left: 3px solid var(--gold);
+    padding: 1rem 1.5rem;
+    margin: 2rem auto;
+    max-width: 720px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+
+  .privacy-note strong {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+    color: var(--ink);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--cream);
+    padding: 0.8rem 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar-bg {
+    background: var(--border);
+    border-radius: 100px;
+    height: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sage), var(--gold));
+    border-radius: 100px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 2.5rem;
+    background: var(--warm-white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px var(--shadow);
+    border: 1px solid rgba(214, 207, 199, 0.5);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.15s; }
+  .section:nth-child(4) { animation-delay: 0.2s; }
+  .section:nth-child(5) { animation-delay: 0.25s; }
+  .section:nth-child(6) { animation-delay: 0.3s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-header {
+    padding: 1.4rem 1.8rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .icon-sage { background: var(--sage-pale); }
+  .icon-terra { background: var(--terracotta-pale); }
+  .icon-gold { background: var(--gold-pale); }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .section-subtitle {
+    font-size: 0.78rem;
+    color: var(--ink-muted);
+    margin-top: 0.15rem;
+    font-style: italic;
+  }
+
+  .section-body {
+    padding: 1.6rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  /* Form fields */
+  .field-row {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .field-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .field-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  @media (max-width: 540px) {
+    .field-row.cols-2,
+    .field-row.cols-3 { grid-template-columns: 1fr; }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.4;
+    margin-top: -0.1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="number"],
+  select,
+  textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.93rem;
+    font-weight: 300;
+    color: var(--ink);
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    width: 100%;
+    transition: all 0.2s ease;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--border-focus);
+    background: var(--warm-white);
+    box-shadow: 0 0 0 3px rgba(124, 154, 138, 0.15);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.6;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2378716c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  /* Radio/Checkbox groups */
+  .options-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.1rem;
+  }
+
+  .option-pill {
+    position: relative;
+  }
+
+  .option-pill input {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+  }
+
+  .option-pill label {
+    display: inline-block;
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.82rem;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: pointer;
+    background: var(--cream);
+    transition: all 0.2s ease;
+    color: var(--ink-light);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .option-pill input:checked + label {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: white;
+  }
+
+  .option-pill label:hover {
+    border-color: var(--sage-light);
+    background: var(--sage-pale);
+  }
+
+  /* Scale */
+  .scale-wrap {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .scale-item {
+    position: relative;
+    flex: 1;
+    min-width: 36px;
+  }
+
+  .scale-item input { position: absolute; opacity: 0; }
+
+  .scale-item label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    background: var(--cream);
+    transition: all 0.15s;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: var(--ink-light);
+  }
+
+  .scale-item input:checked + label {
+    background: var(--terracotta);
+    border-color: var(--terracotta);
+    color: white;
+  }
+
+  .scale-item label:hover {
+    border-color: var(--terracotta);
+    background: var(--terracotta-pale);
+  }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--ink-muted);
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+
+  /* Divider */
+  .field-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.2rem 0;
+    opacity: 0.5;
+  }
+
+  /* Submit */
+  .submit-section {
+    text-align: center;
+    margin-top: 1rem;
+    padding: 0 1.5rem 2rem;
+  }
+
+  .submit-note {
+    font-size: 0.82rem;
+    color: var(--ink-muted);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .btn-submit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: white;
+    background: var(--ink);
+    border: none;
+    border-radius: 100px;
+    padding: 1rem 3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(28,25,23,0.2);
+  }
+
+  .btn-submit:hover {
+    background: var(--sage);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124, 154, 138, 0.35);
+  }
+
+  .btn-submit:active { transform: translateY(0); }
+
+  /* Success state */
+  .success-message {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--warm-white);
+    border-radius: 16px;
+    border: 1px solid var(--sage-pale);
+    margin-top: 1rem;
+  }
+
+  .success-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .success-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--sage);
+    margin-bottom: 0.8rem;
+  }
+
+  .success-text {
+    font-size: 0.9rem;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; }
+    .progress-wrap, .btn-submit { display: none; }
+    .section { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+    .header { background: #1c1917; -webkit-print-color-adjust: exact; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .section-header { padding: 1.1rem 1.2rem; }
+    .section-body { padding: 1.2rem; gap: 1.1rem; }
+    .container { padding: 1.2rem 0.8rem 3rem; }
+    .header { padding: 2rem 1.2rem 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-symbol">ψ</span>
+  <h1>Ficha de Anamnese</h1>
+  <p class="header-sub">Atendimento Psicanalítico</p>
+  <div class="header-divider"></div>
+</div>
+
+<div class="container">
+
+  <div class="privacy-note">
+    <strong>🔒 Confidencialidade</strong>
+    Todas as informações aqui compartilhadas são sigilosas e protegidas pelo Código de Ética Profissional. Responda com a sinceridade que sentir confortável — não há respostas certas ou erradas.
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Progresso do preenchimento</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <form id="anamnese-form" novalidate>
+
+    <!-- 1. Identificação -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-sage">🪴</div>
+        <div>
+          <div class="section-title">Identificação</div>
+          <div class="section-subtitle">Dados básicos para o início do vínculo</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" placeholder="Como gostaria de ser chamado(a)…" required>
+        </div>
+        <div class="field-row cols-3">
+          <div class="field">
+            <label for="nascimento">Data de nascimento</label>
+            <input type="date" id="nascimento" name="nascimento">
+          </div>
+          <div class="field">
+            <label for="idade">Idade</label>
+            <input type="number" id="idade" name="idade" placeholder="Anos" min="1" max="120">
+          </div>
+          <div class="field">
+            <label for="genero">Gênero</label>
+            <select id="genero" name="genero">
+              <option value="">Selecione…</option>
+              <option>Feminino</option>
+              <option>Masculino</option>
+              <option>Não binário</option>
+              <option>Prefiro não informar</option>
+              <option>Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field">
+            <label for="profissao">Profissão / Ocupação</label>
+            <input type="text" id="profissao" name="profissao" placeholder="O que você faz…">
+          </div>
+          <div class="field">
+            <label for="estado_civil">Estado civil</label>
+            <select id="estado_civil" name="estado_civil">
+              <option value="">Selecione…</option>
+              <option>Solteiro(a)</option>
+              <option>Casado(a)</option>
+              <option>Em relacionamento</option>
+              <option>União estável</option>
+              <option>Separado(a) / Divorciado(a)</option>
+              <option>Viúvo(a)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row cols-2">
+          <div class="field">
+            <label for="telefone">Telefone / WhatsApp</label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+          </div>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="seu@email.com">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Motivo da busca -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-terra">🌀</div>
+        <div>
+          <div class="section-title">O que te traz aqui?</div>
+          <div class="section-subtitle">O início do discurso — nas suas próprias palavras</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label for="queixa">Descreva o que te trouxe à análise</label>
+          <p class="field-hint">Use as palavras que vieram naturalmente para você — não precisa de termos técnicos.</p>
+          <textarea id="queixa" name="queixa" rows="4" placeholder="O que está te incomodando, o que te move a buscar ajuda agora…"></textarea>
+        </div>
+        <div class="field">
+          <label for="tempo_queixa">Há quanto tempo isso te acompanha?</label>
+          <select id="tempo_queixa" name="tempo_queixa">
+            <option value="">Selecione…</option>
+            <option>Menos de 1 mês</option>
+            <option>1 a 6 meses</option>
+            <option>6 meses a 1 ano</option>
+            <option>1 a 3 anos</option>
+            <option>3 a 10 anos</option>
+            <option>Mais de 10 anos</option>
+            <option>A vida toda, tanto quanto me lembro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="gatilho">O que mudou para você buscar ajuda agora?</label>
+          <p class="field-hint">Às vezes há um acontecimento recente, uma virada — e às vezes não há nada claro. Tudo vale.</p>
+          <textarea id="gatilho" name="gatilho" rows="3" placeholder="Pode ter sido algo concreto ou uma sensação…"></textarea>
+        </div>
+        <div class="field">
+          <label>Como você descreveria o seu sofrimento agora? (1 = leve, 10 = intenso)</label>
+          <div class="scale-wrap">
+            <div class="scale-item"><input type="radio" name="intensidade" id="s1" value="1"><label for="s1">1</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s2" value="2"><label for="s2">2</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s3" value="3"><label for="s3">3</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s4" value="4"><label for="s4">4</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s5" value="5"><label for="s5">5</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s6" value="6"><label for="s6">6</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s7" value="7"><label for="s7">7</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s8" value="8"><label for="s8">8</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s9" value="9"><label for="s9">9</label></div>
+            <div class="scale-item"><input type="radio" name="intensidade" id="s10" value="10"><label for="s10">10</label></div>
+          </div>
+          <div class="scale-labels"><span>Leve</span><span>Muito intenso</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. História pessoal e familiar -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-gold">🌿</div>
+        <div>
+          <div class="section-title">História pessoal e familiar</div>
+          <div class="section-subtitle">A trama que nos constitui</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label for="familia">Com quem você mora? Como é sua família hoje?</label>
+          <textarea id="familia" name="familia" rows="3" placeholder="Quem faz parte da sua vida doméstica e familiar…"></textarea>
+        </div>
+        <div class="field">
+          <label for="infancia">Como foi sua infância?</label>
+          <p class="field-hint">Pode ser uma lembrança, uma sensação, uma palavra — o que vier.</p>
+          <textarea id="infancia" name="infancia" rows="3" placeholder="O ambiente em que cresceu, como era em casa…"></textarea>
+        </div>
+        <div class="field">
+          <label>Posição entre os irmãos</label>
+          <div class="options-group">
+            <div class="option-pill"><input type="radio" name="fratria" id="f1" value="Filho único"><label for="f1">Filho único</label></div>
+            <div class="option-pill"><input type="radio" name="fratria" id="f2" value="Primogênito"><label for="f2">Primogênito</label></div>
+            <div class="option-pill"><input type="radio" name="fratria" id="f3" value="Do meio"><label for="f3">Do meio</label></div>
+            <div class="option-pill"><input type="radio" name="fratria" id="f4" value="Caçula"><label for="f4">Caçula</label></div>
+            <div class="option-pill"><input type="radio" name="fratria" id="f5" value="Não se aplica"><label for="f5">Não se aplica</label></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="pais">Como era sua relação com os pais (ou quem te criou)?</label>
+          <textarea id="pais" name="pais" rows="3" placeholder="Proximidade, distância, conflitos, cumplicidade…"></textarea>
+        </div>
+        <div class="field">
+          <label for="hist_familia">Há algo relevante na história familiar que te marcou?</label>
+          <p class="field-hint">Perdas, rupturas, segredos, padrões que se repetem nas gerações…</p>
+          <textarea id="hist_familia" name="hist_familia" rows="3" placeholder="O que vier à mente…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Saúde e tratamentos -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-sage">🫀</div>
+        <div>
+          <div class="section-title">Saúde e histórico de tratamentos</div>
+          <div class="section-subtitle">O corpo e suas marcas</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label>Já fez psicoterapia ou análise antes?</label>
+          <div class="options-group">
+            <div class="option-pill"><input type="radio" name="terapia_anterior" id="ta1" value="Não"><label for="ta1">Nunca</label></div>
+            <div class="option-pill"><input type="radio" name="terapia_anterior" id="ta2" value="Sim, no passado"><label for="ta2">Sim, no passado</label></div>
+            <div class="option-pill"><input type="radio" name="terapia_anterior" id="ta3" value="Sim, atualmente"><label for="ta3">Sim, atualmente</label></div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="terapia_detalhes">Se sim, como foi? O que funcionou? Por que parou?</label>
+          <textarea id="terapia_detalhes" name="terapia_detalhes" rows="3" placeholder="Fique à vontade para contar…"></textarea>
+        </div>
+        <div class="field">
+          <label for="medicacoes">Usa medicações atualmente?</label>
+          <input type="text" id="medicacoes" name="medicacoes" placeholder="Nome e dose, ou 'nenhuma'…">
+        </div>
+        <div class="field">
+          <label for="saude_geral">Como está seu sono e sua alimentação?</label>
+          <p class="field-hint">O corpo muitas vezes diz o que as palavras ainda não encontraram.</p>
+          <textarea id="saude_geral" name="saude_geral" rows="3" placeholder="Qualidade do sono, apetite, energia no dia a dia…"></textarea>
+        </div>
+        <div class="field">
+          <label>Você considera seu uso de álcool, substâncias ou outras práticas como algo que te preocupa?</label>
+          <div class="options-group">
+            <div class="option-pill"><input type="radio" name="substancias" id="sub1" value="Não"><label for="sub1">Não</label></div>
+            <div class="option-pill"><input type="radio" name="substancias" id="sub2" value="Um pouco"><label for="sub2">Um pouco</label></div>
+            <div class="option-pill"><input type="radio" name="substancias" id="sub3" value="Sim"><label for="sub3">Sim</label></div>
+            <div class="option-pill"><input type="radio" name="substancias" id="sub4" value="Prefiro conversar pessoalmente"><label for="sub4">Prefiro conversar pessoalmente</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Vida afetiva e social -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-terra">💬</div>
+        <div>
+          <div class="section-title">Vida afetiva e social</div>
+          <div class="section-subtitle">Vínculos, escolhas e padrões</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label for="relacionamentos">Como são seus relacionamentos afetivos?</label>
+          <p class="field-hint">Há um padrão que se repete? Como você se vincula às pessoas?</p>
+          <textarea id="relacionamentos" name="relacionamentos" rows="3" placeholder="Parcerias amorosas, amizades, como você se relaciona…"></textarea>
+        </div>
+        <div class="field">
+          <label for="vida_sexual">Há algo sobre sua vida sexual que queira mencionar?</label>
+          <p class="field-hint">Opcional — só o que você se sentir confortável em compartilhar agora.</p>
+          <textarea id="vida_sexual" name="vida_sexual" rows="2" placeholder="Inibições, questões recorrentes, ou simplesmente 'nada a dizer'…"></textarea>
+        </div>
+        <div class="field">
+          <label for="trabalho">Como é sua relação com o trabalho e com o tempo livre?</label>
+          <textarea id="trabalho" name="trabalho" rows="3" placeholder="Com a autoridade, com descanso, com prazer…"></textarea>
+        </div>
+        <div class="field">
+          <label for="social">Como você se sente em relação às suas amizades e vida social?</label>
+          <div class="options-group">
+            <div class="option-pill"><input type="radio" name="social_feel" id="sf1" value="Satisfeito"><label for="sf1">Satisfeito</label></div>
+            <div class="option-pill"><input type="radio" name="social_feel" id="sf2" value="Solitário"><label for="sf2">Solitário</label></div>
+            <div class="option-pill"><input type="radio" name="social_feel" id="sf3" value="Sobrecarregado"><label for="sf3">Sobrecarregado</label></div>
+            <div class="option-pill"><input type="radio" name="social_feel" id="sf4" value="Ambivalente"><label for="sf4">Ambivalente</label></div>
+            <div class="option-pill"><input type="radio" name="social_feel" id="sf5" value="Isolado por escolha"><label for="sf5">Isolado por escolha</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Espaço livre -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-gold">✍️</div>
+        <div>
+          <div class="section-title">Espaço livre</div>
+          <div class="section-subtitle">Tudo o que ficou de fora, mas quer dizer</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="field">
+          <label for="expectativas">O que você espera de uma análise? O que espera de mim?</label>
+          <textarea id="expectativas" name="expectativas" rows="3" placeholder="Suas expectativas, medos ou esperanças sobre esse processo…"></textarea>
+        </div>
+        <div class="field">
+          <label for="livre">Algo que você queira dizer e ainda não coube em nenhuma pergunta?</label>
+          <p class="field-hint">Este é o espaço da fala que escapa — o que ficou de fora e insiste em estar aqui.</p>
+          <textarea id="livre" name="livre" rows="4" placeholder="Escreva livremente…"></textarea>
+        </div>
+        <div class="field">
+          <label for="como_chegou">Como chegou até mim?</label>
+          <select id="como_chegou" name="como_chegou">
+            <option value="">Selecione…</option>
+            <option>Indicação de amigo ou familiar</option>
+            <option>Indicação médica</option>
+            <option>Instagram / redes sociais</option>
+            <option>Site ou Google</option>
+            <option>Plataforma de saúde mental</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-section">
+      <p class="submit-note">
+        Ao enviar, você autoriza que estas informações sejam utilizadas<br>
+        exclusivamente para fins clínicos, sob sigilo profissional.
+      </p>
+      <button type="submit" class="btn-submit">Enviar ficha</button>
+    </div>
+
+  </form>
+
+  <div class="success-message" id="success-msg">
+    <span class="success-icon">🌿</span>
+    <div class="success-title">Recebido com cuidado.</div>
+    <p class="success-text">
+      Sua ficha foi enviada. Agora é só aguardar o contato para darmos início a esse processo juntos.<br><br>
+      <em>Obrigado pela confiança e pela coragem de dar esse passo.</em>
+    </p>
+  </div>
+
+</div>
+
+<script>
+  // Progress tracking
+  const form = document.getElementById('anamnese-form');
+  const fill = document.getElementById('progress-fill');
+  const pct = document.getElementById('progress-pct');
+
+  function updateProgress() {
+    const inputs = form.querySelectorAll('input[type="text"], input[type="date"], input[type="tel"], input[type="email"], input[type="number"], select, textarea');
+    const radios = {};
+    form.querySelectorAll('input[type="radio"]:checked').forEach(r => radios[r.name] = true);
+
+    let filled = 0;
+    inputs.forEach(el => { if (el.value.trim()) filled++; });
+    filled += Object.keys(radios).length;
+
+    const totalInputs = inputs.length;
+    const totalRadioGroups = new Set(Array.from(form.querySelectorAll('input[type="radio"]')).map(r => r.name)).size;
+    const total = totalInputs + totalRadioGroups;
+
+    const p = Math.min(Math.round((filled / total) * 100), 100);
+    fill.style.width = p + '%';
+    pct.textContent = p + '%';
+  }
+
+  form.addEventListener('input', updateProgress);
+  form.addEventListener('change', updateProgress);
+
+  // Submit
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    form.style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>

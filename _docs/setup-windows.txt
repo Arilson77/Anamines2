@@ -1,0 +1,183 @@
+# =============================================================
+# setup-windows.ps1
+# Move o projeto para fora do OneDrive e instala tudo
+# Executar como Administrador no PowerShell
+# =============================================================
+
+# --- Configurações ---
+$ORIGEM  = "$env:USERPROFILE\OneDrive - PETROBRAS\Área de Trabalho\Anamines2-master"
+$DESTINO = "C:\projetos\anamnese"
+
+# =============================================================
+# PASSO 1 — Criar pasta de destino fora do OneDrive
+# =============================================================
+Write-Host ""
+Write-Host "🌿 Passo 1: Criando pasta C:\projetos\anamnese..." -ForegroundColor Cyan
+
+if (Test-Path $DESTINO) {
+    Write-Host "   Pasta já existe, pulando criação." -ForegroundColor Yellow
+} else {
+    New-Item -ItemType Directory -Path $DESTINO -Force | Out-Null
+    Write-Host "   Pasta criada com sucesso." -ForegroundColor Green
+}
+
+# =============================================================
+# PASSO 2 — Copiar projeto para o novo local
+# =============================================================
+Write-Host ""
+Write-Host "📦 Passo 2: Copiando projeto..." -ForegroundColor Cyan
+
+if (Test-Path $ORIGEM) {
+    Copy-Item -Path "$ORIGEM\*" -Destination $DESTINO -Recurse -Force
+    Write-Host "   Projeto copiado para $DESTINO" -ForegroundColor Green
+} else {
+    Write-Host "   AVISO: Pasta de origem não encontrada: $ORIGEM" -ForegroundColor Yellow
+    Write-Host "   Continuando com a pasta atual..." -ForegroundColor Yellow
+    $DESTINO = Get-Location
+}
+
+# =============================================================
+# PASSO 3 — Entrar na pasta do projeto
+# =============================================================
+Set-Location $DESTINO
+Write-Host ""
+Write-Host "📁 Trabalhando em: $DESTINO" -ForegroundColor Cyan
+
+# =============================================================
+# PASSO 4 — Instalar extensões do VS Code (uma por vez)
+# =============================================================
+Write-Host ""
+Write-Host "🔧 Passo 4: Instalando extensões do VS Code..." -ForegroundColor Cyan
+
+$extensoes = @(
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "rangav.vscode-thunder-client",
+    "cweijan.vscode-postgresql-client2",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
+    "mikestead.dotenv"
+)
+
+foreach ($ext in $extensoes) {
+    Write-Host "   Instalando $ext..." -ForegroundColor Gray
+    $resultado = code --install-extension $ext 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "   ✅ $ext instalado" -ForegroundColor Green
+    } else {
+        Write-Host "   ⚠️  $ext — verifique manualmente" -ForegroundColor Yellow
+    }
+    Start-Sleep -Milliseconds 500
+}
+
+# =============================================================
+# PASSO 5 — Instalar dependências do backend (se existir)
+# =============================================================
+Write-Host ""
+Write-Host "📦 Passo 5: Instalando dependências do backend..." -ForegroundColor Cyan
+
+$backendPath = Join-Path $DESTINO "anamnese-api"
+
+if (Test-Path $backendPath) {
+    Set-Location $backendPath
+
+    if (Test-Path "package.json") {
+        Write-Host "   Rodando npm install em anamnese-api..." -ForegroundColor Gray
+        npm install
+        Write-Host "   ✅ Backend pronto" -ForegroundColor Green
+    }
+
+    # Criar .env se não existir
+    if (-not (Test-Path ".env")) {
+        if (Test-Path ".env.example") {
+            Copy-Item ".env.example" ".env"
+            Write-Host "   ✅ .env criado a partir do .env.example" -ForegroundColor Green
+            Write-Host "   ⚠️  IMPORTANTE: Abra anamnese-api\.env e preencha DATABASE_URL e JWT_SECRET" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "   .env já existe, pulando." -ForegroundColor Yellow
+    }
+
+    Set-Location $DESTINO
+} else {
+    Write-Host "   Pasta anamnese-api não encontrada, pulando." -ForegroundColor Yellow
+}
+
+# =============================================================
+# PASSO 6 — Instalar dependências do frontend (se existir)
+# =============================================================
+Write-Host ""
+Write-Host "📦 Passo 6: Instalando dependências do frontend..." -ForegroundColor Cyan
+
+$frontendPath = Join-Path $DESTINO "anamnese-web"
+
+if (Test-Path $frontendPath) {
+    Set-Location $frontendPath
+
+    if (Test-Path "package.json") {
+        Write-Host "   Rodando npm install em anamnese-web..." -ForegroundColor Gray
+        npm install
+        Write-Host "   ✅ Frontend pronto" -ForegroundColor Green
+    } else {
+        Write-Host "   package.json não encontrado." -ForegroundColor Yellow
+        Write-Host "   Execute manualmente dentro de anamnese-web:" -ForegroundColor Yellow
+        Write-Host "   npx create-next-app@latest . --typescript --tailwind --app --src-dir --import-alias '@/*'" -ForegroundColor White
+    }
+
+    # Criar .env.local se não existir
+    if (-not (Test-Path ".env.local")) {
+        Set-Content -Path ".env.local" -Value "NEXT_PUBLIC_API_URL=http://localhost:3001"
+        Write-Host "   ✅ .env.local criado" -ForegroundColor Green
+    }
+
+    Set-Location $DESTINO
+} else {
+    Write-Host "   Pasta anamnese-web não encontrada, pulando." -ForegroundColor Yellow
+}
+
+# =============================================================
+# PASSO 7 — Gerar JWT_SECRET automaticamente
+# =============================================================
+Write-Host ""
+Write-Host "🔑 Passo 7: Gerando JWT_SECRET..." -ForegroundColor Cyan
+
+$jwtSecret = -join ((1..64) | ForEach-Object { '{0:x}' -f (Get-Random -Max 256) })
+Write-Host "   Seu JWT_SECRET (copie para o .env):" -ForegroundColor Gray
+Write-Host "   $jwtSecret" -ForegroundColor White
+
+$envPath = Join-Path $backendPath ".env"
+if (Test-Path $envPath) {
+    # Substitui o placeholder pelo segredo real
+    (Get-Content $envPath) -replace 'JWT_SECRET=seu_segredo_aqui', "JWT_SECRET=$jwtSecret" |
+        Set-Content $envPath
+    Write-Host "   ✅ JWT_SECRET inserido automaticamente no .env" -ForegroundColor Green
+}
+
+# =============================================================
+# PASSO 8 — Abrir no VS Code
+# =============================================================
+Write-Host ""
+Write-Host "🚀 Passo 8: Abrindo projeto no VS Code..." -ForegroundColor Cyan
+Set-Location $DESTINO
+code .
+
+# =============================================================
+# RESUMO FINAL
+# =============================================================
+Write-Host ""
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host "  ✅ SETUP CONCLUÍDO" -ForegroundColor Green
+Write-Host "============================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "📁 Projeto em: $DESTINO" -ForegroundColor White
+Write-Host ""
+Write-Host "Próximos passos:" -ForegroundColor Yellow
+Write-Host "  1. Preencha DATABASE_URL no arquivo anamnese-api\.env" -ForegroundColor White
+Write-Host "  2. Rode o banco:  cd anamnese-api  →  npm run db:setup" -ForegroundColor White
+Write-Host "  3. Inicie a API:  npm run dev  (porta 3001)" -ForegroundColor White
+Write-Host "  4. Inicie o web:  cd ..\anamnese-web  →  npm run dev  (porta 3000)" -ForegroundColor White
+Write-Host ""
+Write-Host "  Se o Next.js ainda não foi criado, dentro de anamnese-web rode:" -ForegroundColor Yellow
+Write-Host "  npx create-next-app@latest . --typescript --tailwind --app --src-dir --import-alias '@/*'" -ForegroundColor White
+Write-Host ""

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Georgia, serif; background: #f7f3ee; margin: 0; padding: 0; }
+  .wrap { max-width: 620px; margin: 0 auto; background: #fdfaf6; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  .header { background: #1c1917; color: #f7f3ee; padding: 2rem; text-align: center; }
+  .header .symbol { font-size: 1.8rem; color: #a8c0b0; display: block; margin-bottom: 0.5rem; }
+  .header h1 { font-size: 1.4rem; font-weight: 300; font-style: italic; margin: 0; }
+  .header p { font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: #a8c0b0; margin: 0.5rem 0 0; }
+  .body { padding: 2rem; }
+  .section { margin-bottom: 1.8rem; }
+  .section-title { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #7c9a8a; border-bottom: 1px solid #e8f0eb; padding-bottom: 0.4rem; margin-bottom: 1rem; }
+  .field { margin-bottom: 0.9rem; }
+  .field-label { font-size: 0.75rem; color: #78716c; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.2rem; }
+  .field-value { font-size: 0.92rem; color: #1c1917; line-height: 1.6; }
+  .badge { display: inline-block; background: #e8f0eb; color: #3d6b56; font-size: 0.78rem; padding: 0.25rem 0.7rem; border-radius: 100px; }
+  .badge.terra { background: #f5ebe5; color: #8b4a35; }
+  .badge.gold { background: #f5eddc; color: #8a6830; }
+  .footer { background: #1c1917; color: #78716c; text-align: center; padding: 1.2rem; font-size: 0.75rem; }
+  .footer em { color: #a8c0b0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <span class="symbol">ψ</span>
+    <h1>Nova Ficha de Anamnese</h1>
+    <p>Atendimento Psicanalítico</p>
+  </div>
+
+  <div class="body">
+
+    <div class="section">
+      <div class="section-title">🪴 Identificação</div>
+      <div class="field"><span class="field-label">Nome</span><span class="field-value">{{nome}}</span></div>
+      <div class="field"><span class="field-label">Data de nascimento</span><span class="field-value">{{nascimento}}</span></div>
+      <div class="field"><span class="field-label">Idade</span><span class="field-value">{{idade}} anos</span></div>
+      <div class="field"><span class="field-label">Gênero</span><span class="field-value"><span class="badge">{{genero}}</span></span></div>
+      <div class="field"><span class="field-label">Profissão</span><span class="field-value">{{profissao}}</span></div>
+      <div class="field"><span class="field-label">Estado civil</span><span class="field-value">{{estado_civil}}</span></div>
+      <div class="field"><span class="field-label">Telefone</span><span class="field-value">{{telefone}}</span></div>
+      <div class="field"><span class="field-label">E-mail</span><span class="field-value">{{email}}</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🌀 Motivo da busca</div>
+      <div class="field"><span class="field-label">O que trouxe à análise</span><span class="field-value">{{queixa}}</span></div>
+      <div class="field"><span class="field-label">Há quanto tempo</span><span class="field-value"><span class="badge terra">{{tempo_queixa}}</span></span></div>
+      <div class="field"><span class="field-label">O que mudou para buscar ajuda agora</span><span class="field-value">{{gatilho}}</span></div>
+      <div class="field"><span class="field-label">Intensidade do sofrimento</span><span class="field-value"><span class="badge terra">{{intensidade}} / 10</span></span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🌿 História pessoal e familiar</div>
+      <div class="field"><span class="field-label">Família atual</span><span class="field-value">{{familia}}</span></div>
+      <div class="field"><span class="field-label">Infância</span><span class="field-value">{{infancia}}</span></div>
+      <div class="field"><span class="field-label">Posição entre irmãos</span><span class="field-value"><span class="badge">{{fratria}}</span></span></div>
+      <div class="field"><span class="field-label">Relação com os pais</span><span class="field-value">{{pais}}</span></div>
+      <div class="field"><span class="field-label">História familiar relevante</span><span class="field-value">{{hist_familia}}</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🫀 Saúde e tratamentos</div>
+      <div class="field"><span class="field-label">Terapia anterior</span><span class="field-value"><span class="badge">{{terapia_anterior}}</span></span></div>
+      <div class="field"><span class="field-label">Detalhes sobre terapia anterior</span><span class="field-value">{{terapia_detalhes}}</span></div>
+      <div class="field"><span class="field-label">Medicações</span><span class="field-value">{{medicacoes}}</span></div>
+      <div class="field"><span class="field-label">Sono e alimentação</span><span class="field-value">{{saude_geral}}</span></div>
+      <div class="field"><span class="field-label">Uso de substâncias</span><span class="field-value"><span class="badge terra">{{substancias}}</span></span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">💬 Vida afetiva e social</div>
+      <div class="field"><span class="field-label">Relacionamentos afetivos</span><span class="field-value">{{relacionamentos}}</span></div>
+      <div class="field"><span class="field-label">Vida sexual</span><span class="field-value">{{vida_sexual}}</span></div>
+      <div class="field"><span class="field-label">Trabalho e tempo livre</span><span class="field-value">{{trabalho}}</span></div>
+      <div class="field"><span class="field-label">Vida social</span><span class="field-value"><span class="badge">{{social_feel}}</span></span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">✍️ Espaço livre</div>
+      <div class="field"><span class="field-label">Expectativas sobre a análise</span><span class="field-value">{{expectativas}}</span></div>
+      <div class="field"><span class="field-label">Espaço livre</span><span class="field-value">{{livre}}</span></div>
+      <div class="field"><span class="field-label">Como chegou</span><span class="field-value"><span class="badge gold">{{como_chegou}}</span></span></div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Enviado via formulário de anamnese &nbsp;·&nbsp; <em>Sigilo profissional</em>
+  </div>
+
+</div>
+</body>
+</html>
