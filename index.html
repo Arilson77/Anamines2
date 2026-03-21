@@ -6,6 +6,8 @@
 <title>Ficha de Anamnese — Atendimento Psicanalítico</title>
   <!-- EmailJS Script -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- Configuração do e-mail do psicanalista -->
+  <script src="config.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -871,6 +873,17 @@
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
+
+      // Adiciona o e-mail do psicanalista ao formulário antes de enviar
+      let emailInput = form.querySelector('input[name="destinatario_psicanalista"]');
+      if (!emailInput) {
+        emailInput = document.createElement('input');
+        emailInput.type = 'hidden';
+        emailInput.name = 'destinatario_psicanalista';
+        form.appendChild(emailInput);
+      }
+      emailInput.value = window.PSICANALISTA_EMAIL || '';
+
       emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, form)
         .then(function() {
           form.style.display = 'none';
@@ -891,7 +904,12 @@
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
-</script>
+    </script>
+
+    <!-- Rodapé de suporte -->
+    <footer style="background: #f5eddc; color: #44403c; text-align: center; padding: 1.2rem 0; font-size: 0.95rem; border-top: 1px solid #d6cfc7; margin-top: 2rem;">
+      Dúvidas ou suporte? Fale com o desenvolvedor: <a href="mailto:seuemail@dominio.com" style="color: #b5694d; text-decoration: underline;">seuemail@dominio.com</a>
+    </footer>
 
 </body>
 </html>
