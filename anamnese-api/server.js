@@ -13,9 +13,14 @@ const erros           = require('./src/middleware/erros');
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
+const FRONTEND_URLS = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map(u => u.trim())
+  .filter(Boolean);
+
 const allowedOrigin = (origin, callback) => {
   const isLocalhost = !origin || /^https?:\/\/localhost(:\d+)?$/.test(origin);
-  if (isLocalhost || origin === process.env.FRONTEND_URL) {
+  if (isLocalhost || FRONTEND_URLS.includes(origin)) {
     callback(null, true);
   } else {
     callback(new Error(`CORS bloqueado para origem: ${origin}`));
