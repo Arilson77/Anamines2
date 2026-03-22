@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -12,23 +12,23 @@ type Status = {
 };
 
 const LABELS: Record<string, string> = {
-  trial:    'Trial gratuito',
-  ativa:    'Ativa',
-  expirada: 'Expirada',
+  trial:     'Trial gratuito',
+  ativa:     'Ativa',
+  expirada:  'Expirada',
   cancelada: 'Cancelada',
 };
 
 const CORES: Record<string, string> = {
-  trial:    'bg-amber-50 text-amber-700 border-amber-200',
-  ativa:    'bg-teal-50 text-teal-700 border-teal-200',
-  expirada: 'bg-red-50 text-red-700 border-red-200',
-  cancelada:'bg-stone-100 text-stone-500 border-stone-200',
+  trial:     'bg-amber-50 text-amber-700 border-amber-200',
+  ativa:     'bg-teal-50 text-teal-700 border-teal-200',
+  expirada:  'bg-red-50 text-red-700 border-red-200',
+  cancelada: 'bg-stone-100 text-stone-500 border-stone-200',
 };
 
-export default function AssinaturaPage() {
+function AssinaturaConteudo() {
   const [status, setStatus]   = useState<Status | null>(null);
   const [loading, setLoading] = useState(false);
-  const params = useSearchParams();
+  const params  = useSearchParams();
   const sucesso = params.get('sucesso');
 
   useEffect(() => {
@@ -50,9 +50,7 @@ export default function AssinaturaPage() {
   if (!status) return <p className="text-stone-400 text-sm">Carregando…</p>;
 
   return (
-    <div className="max-w-lg">
-      <h1 className="text-2xl font-light italic text-stone-800 mb-8">Assinatura</h1>
-
+    <>
       {sucesso && (
         <div className="bg-teal-50 border border-teal-200 text-teal-700 rounded-xl px-4 py-3 mb-6 text-sm">
           Assinatura ativada com sucesso! Bem-vindo ao plano {status.plano}.
@@ -106,6 +104,17 @@ export default function AssinaturaPage() {
           </button>
         )}
       </div>
+    </>
+  );
+}
+
+export default function AssinaturaPage() {
+  return (
+    <div className="max-w-lg">
+      <h1 className="text-2xl font-light italic text-stone-800 mb-8">Assinatura</h1>
+      <Suspense fallback={<p className="text-stone-400 text-sm">Carregando…</p>}>
+        <AssinaturaConteudo />
+      </Suspense>
     </div>
   );
 }
