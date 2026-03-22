@@ -19,8 +19,10 @@ const FRONTEND_URLS = (process.env.FRONTEND_URL || '')
   .filter(Boolean);
 
 const allowedOrigin = (origin, callback) => {
-  const isLocalhost = !origin || /^https?:\/\/localhost(:\d+)?$/.test(origin);
-  if (isLocalhost || FRONTEND_URLS.includes(origin)) {
+  const isLocalhost    = !origin || /^https?:\/\/localhost(:\d+)?$/.test(origin);
+  const isVercel       = origin  && /^https:\/\/anamines2[^.]*\.vercel\.app$/.test(origin);
+  const isEnvAllowed   = FRONTEND_URLS.includes(origin);
+  if (isLocalhost || isVercel || isEnvAllowed) {
     callback(null, true);
   } else {
     callback(new Error(`CORS bloqueado para origem: ${origin}`));
