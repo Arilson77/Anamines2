@@ -1,8 +1,10 @@
-const router     = require('express').Router();
-const autenticar = require('../middleware/autenticar');
-const ctrl       = require('../controllers/fichas');
+const router         = require('express').Router();
+const autenticar     = require('../middleware/autenticar');
+const verificarPlano = require('../middleware/verificarPlano');
+const ctrl           = require('../controllers/fichas');
 
 router.use(autenticar);
+router.use(verificarPlano);
 
 router.get('/',             ctrl.listar);
 router.get('/:id',          ctrl.buscar);

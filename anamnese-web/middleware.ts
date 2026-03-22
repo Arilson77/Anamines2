@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ROTAS_PUBLICAS = ['/login', '/cadastro', '/consentimento'];
+const ROTAS_PUBLICAS = ['/login', '/cadastro', '/consentimento', '/planos'];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

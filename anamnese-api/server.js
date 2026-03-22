@@ -7,13 +7,13 @@ const pacientesRoutes = require('./src/routes/pacientes');
 const fichasRoutes    = require('./src/routes/fichas');
 const publicoRoutes   = require('./src/routes/publico');
 const configRoutes    = require('./src/routes/configuracoes');
+const cobrancaRoutes  = require('./src/routes/cobranca');
 const erros           = require('./src/middleware/erros');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
 const allowedOrigin = (origin, callback) => {
-  // Em dev aceita qualquer localhost; em prod valida FRONTEND_URL
   const isLocalhost = !origin || /^https?:\/\/localhost(:\d+)?$/.test(origin);
   if (isLocalhost || origin === process.env.FRONTEND_URL) {
     callback(null, true);
@@ -22,6 +22,9 @@ const allowedOrigin = (origin, callback) => {
   }
 };
 app.use(cors({ origin: allowedOrigin, credentials: true }));
+
+// Webhook Stripe precisa de corpo raw (antes do express.json)
+app.use('/cobranca/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 app.use('/auth',          authRoutes);
@@ -29,18 +32,13 @@ app.use('/pacientes',     pacientesRoutes);
 app.use('/fichas',        fichasRoutes);
 app.use('/publico',       publicoRoutes);
 app.use('/configuracoes', configRoutes);
+app.use('/cobranca',      cobrancaRoutes);
 
-// Health check
 app.get('/health', (req, res) => res.json({ ok: true }));
-
-// Middleware de erros (sempre por último)
 app.use(erros);
 
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
 
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled rejection:', err?.message || err);
-});
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught exception:', err?.message || err);
-});
+process.on('unhandledRejection', (err) => console.error('Unhandled rejection:', err?.message || err));
+process.on('uncaughtException',  (err) => console.error('Uncaught exception:',  err?.message || err));
+

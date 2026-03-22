@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/pacientes',      label: 'Pacientes',     icone: '♡' },
   { href: '/fichas',         label: 'Fichas',        icone: '☰' },
   { href: '/configuracoes',  label: 'Configurações', icone: '⚙' },
+  { href: '/assinatura',     label: 'Assinatura',    icone: '★' },
 ];
 
 export default function Sidebar() {
