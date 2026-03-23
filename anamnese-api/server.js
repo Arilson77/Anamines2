@@ -1,6 +1,11 @@
 require('dotenv').config();
+const Sentry  = require('@sentry/node');
 const express = require('express');
 const cors    = require('cors');
+
+if (process.env.SENTRY_DSN) {
+  Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV || 'production' });
+}
 
 const authRoutes      = require('./src/routes/auth');
 const pacientesRoutes = require('./src/routes/pacientes');
@@ -42,6 +47,7 @@ app.use('/configuracoes', configRoutes);
 app.use('/cobranca',      cobrancaRoutes);
 
 app.get('/health', (req, res) => res.json({ ok: true }));
+if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
 app.use(erros);
 
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
