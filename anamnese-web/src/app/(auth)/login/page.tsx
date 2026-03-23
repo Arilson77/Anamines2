@@ -39,14 +39,16 @@ function LoginForm() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">E-mail</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            <label htmlFor="email" className="block text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">E-mail</label>
+            <input id="email" name="email" type="email" autoComplete="email"
+              value={email} onChange={e => setEmail(e.target.value)}
               className="w-full border border-stone-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-300 bg-stone-50"
               placeholder="seu@email.com" required />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Senha</label>
-            <input type="password" value={senha} onChange={e => setSenha(e.target.value)}
+            <label htmlFor="senha" className="block text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Senha</label>
+            <input id="senha" name="senha" type="password" autoComplete="current-password"
+              value={senha} onChange={e => setSenha(e.target.value)}
               className="w-full border border-stone-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-stone-300 bg-stone-50"
               placeholder="••••••••" required />
           </div>
