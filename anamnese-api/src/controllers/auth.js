@@ -1,6 +1,7 @@
-const bcrypt = require('bcrypt');
-const jwt    = require('jsonwebtoken');
-const pool   = require('../config/db');
+const bcrypt   = require('bcrypt');
+const jwt      = require('jsonwebtoken');
+const pool     = require('../config/db');
+const logsnag  = require('../config/logsnag');
 
 exports.login = async (req, res, next) => {
   const { email, senha } = req.body;
@@ -42,6 +43,13 @@ exports.cadastro = async (req, res, next) => {
     );
 
     await client.query('COMMIT');
+    await logsnag.track({
+      channel: 'usuarios',
+      event:   'Novo cadastro',
+      description: `${nome} (${email})`,
+      icon:    '🎉',
+      notify:  true,
+    });
     res.status(201).json({ mensagem: 'Conta criada com sucesso' });
   } catch (err) {
     await client.query('ROLLBACK');

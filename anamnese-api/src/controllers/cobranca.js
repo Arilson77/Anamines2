@@ -1,5 +1,6 @@
-const pool   = require('../config/db');
-const stripe = process.env.STRIPE_SECRET_KEY
+const pool    = require('../config/db');
+const logsnag = require('../config/logsnag');
+const stripe  = process.env.STRIPE_SECRET_KEY
   ? require('stripe')(process.env.STRIPE_SECRET_KEY)
   : null;
 
@@ -125,6 +126,13 @@ exports.webhook = async (req, res) => {
            WHERE id = $3`,
           [plano, obj.subscription, tenant_id]
         );
+        await logsnag.track({
+          channel:     'assinaturas',
+          event:       'Nova assinatura',
+          description: `Plano ${plano} ativado`,
+          icon:        '💳',
+          notify:      true,
+        });
         break;
       }
       case 'customer.subscription.deleted': {
@@ -133,6 +141,12 @@ exports.webhook = async (req, res) => {
            WHERE stripe_subscription_id = $2`,
           [new Date(), obj.id]
         );
+        await logsnag.track({
+          channel:     'assinaturas',
+          event:       'Assinatura cancelada',
+          icon:        '⚠️',
+          notify:      true,
+        });
         break;
       }
       case 'customer.subscription.updated': {
