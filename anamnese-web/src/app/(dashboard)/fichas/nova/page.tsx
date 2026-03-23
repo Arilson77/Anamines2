@@ -151,11 +151,11 @@ function NovaFichaForm() {
       <Textarea dados={dados} set={set} label="Existe algum gatilho ou evento desencadeante?" campo="gatilho"
         placeholder="Algo que pode ter iniciado ou intensificado o problema…" />
       <div>
-        <label htmlFor="intensidade" className={`${LABEL_CLASS} mb-2`}>
+        <label className={`${LABEL_CLASS} mb-2`}>
           Intensidade do sofrimento (1 = leve · 10 = muito intenso)
         </label>
         <div className="flex items-center gap-4">
-          <input id="intensidade" type="range" min="1" max="10" value={dados.intensidade}
+          <input type="range" min="1" max="10" value={dados.intensidade}
             onChange={e => set('intensidade', e.target.value)}
             className="flex-1 accent-stone-700" />
           <span className="text-2xl font-light text-stone-700 w-8 text-center">{dados.intensidade}</span>
