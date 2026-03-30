@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
 
 const ROTAS_PUBLICAS = ['/login', '/cadastro', '/consentimento', '/planos'];
 
-export function middleware(req: NextRequest) {
+function redirecionarLogin(req: NextRequest) {
+  const url = req.nextUrl.clone();
+  url.pathname = '/login';
+  url.searchParams.set('redirect', req.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (
@@ -16,13 +24,17 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get('anamnese_token')?.value;
 
   if (!token) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
+    return redirecionarLogin(req);
   }
 
-  return NextResponse.next();
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    await jwtVerify(token, secret);
+    return NextResponse.next();
+  } catch {
+    // Token inválido, adulterado ou expirado — redireciona para login
+    return redirecionarLogin(req);
+  }
 }
 
 export const config = {
