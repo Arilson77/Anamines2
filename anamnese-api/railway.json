@@ -5,6 +5,7 @@
   },
   "deploy": {
     "startCommand": "node server.js",
+    "releaseCommand": "psql $DATABASE_URL -f schema.sql",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
     "healthcheckPath": "/health",

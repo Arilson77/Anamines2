@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- =============================================
 -- 1. TENANTS (cada psicanalista/consultório)
 -- =============================================
-CREATE TABLE tenants (
+CREATE TABLE IF NOT EXISTS tenants (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nome        TEXT NOT NULL,
   email       TEXT NOT NULL UNIQUE,
@@ -16,7 +16,7 @@ CREATE TABLE tenants (
 -- =============================================
 -- 2. USUARIOS
 -- =============================================
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   nome        TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE usuarios (
 -- =============================================
 -- 3. PACIENTES
 -- =============================================
-CREATE TABLE pacientes (
+CREATE TABLE IF NOT EXISTS pacientes (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id           UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   nome                TEXT NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE pacientes (
 -- =============================================
 -- 4. FICHAS DE ANAMNESE
 -- =============================================
-CREATE TABLE fichas_anamnese (
+CREATE TABLE IF NOT EXISTS fichas_anamnese (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id     UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   paciente_id   UUID NOT NULL REFERENCES pacientes(id) ON DELETE CASCADE,
@@ -61,14 +61,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_fichas_atualizado_em
+CREATE OR REPLACE TRIGGER trigger_fichas_atualizado_em
   BEFORE UPDATE ON fichas_anamnese
   FOR EACH ROW EXECUTE FUNCTION atualizar_timestamp();
 
 -- =============================================
 -- 5. CONSENTIMENTOS LGPD
 -- =============================================
-CREATE TABLE consentimentos_lgpd (
+CREATE TABLE IF NOT EXISTS consentimentos_lgpd (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id    UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   paciente_id  UUID NOT NULL REFERENCES pacientes(id) ON DELETE CASCADE,
@@ -81,7 +81,7 @@ CREATE TABLE consentimentos_lgpd (
 -- =============================================
 -- 6. LOGS DE ACESSO (auditoria LGPD)
 -- =============================================
-CREATE TABLE logs_acesso (
+CREATE TABLE IF NOT EXISTS logs_acesso (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   usuario_id  UUID REFERENCES usuarios(id) ON DELETE SET NULL,
@@ -99,16 +99,36 @@ ALTER TABLE fichas_anamnese     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consentimentos_lgpd ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logs_acesso         ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_pacientes      ON pacientes           USING (tenant_id = current_setting('app.tenant_id')::UUID);
-CREATE POLICY tenant_fichas         ON fichas_anamnese     USING (tenant_id = current_setting('app.tenant_id')::UUID);
-CREATE POLICY tenant_consentimentos ON consentimentos_lgpd USING (tenant_id = current_setting('app.tenant_id')::UUID);
-CREATE POLICY tenant_logs           ON logs_acesso         USING (tenant_id = current_setting('app.tenant_id')::UUID);
+-- Policies (ignorar se já existirem)
+DO $$ BEGIN
+  CREATE POLICY tenant_pacientes ON pacientes
+    USING (tenant_id = current_setting('app.tenant_id')::UUID);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE POLICY tenant_fichas ON fichas_anamnese
+    USING (tenant_id = current_setting('app.tenant_id')::UUID);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE POLICY tenant_consentimentos ON consentimentos_lgpd
+    USING (tenant_id = current_setting('app.tenant_id')::UUID);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE POLICY tenant_logs ON logs_acesso
+    USING (tenant_id = current_setting('app.tenant_id')::UUID);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- =============================================
 -- ÍNDICES DE PERFORMANCE
 -- =============================================
-CREATE INDEX idx_pacientes_tenant ON pacientes(tenant_id);
-CREATE INDEX idx_fichas_tenant    ON fichas_anamnese(tenant_id);
-CREATE INDEX idx_fichas_paciente  ON fichas_anamnese(paciente_id);
-CREATE INDEX idx_logs_tenant      ON logs_acesso(tenant_id);
-CREATE INDEX idx_fichas_dados     ON fichas_anamnese USING GIN(dados);
+CREATE INDEX IF NOT EXISTS idx_pacientes_tenant ON pacientes(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_fichas_tenant    ON fichas_anamnese(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_fichas_paciente  ON fichas_anamnese(paciente_id);
+CREATE INDEX IF NOT EXISTS idx_logs_tenant      ON logs_acesso(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_fichas_dados     ON fichas_anamnese USING GIN(dados);
