@@ -20,6 +20,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new Error('Sessão expirada');
   }
 
+  if (res.status === 402) {
+    window.location.href = '/planos';
+    throw new Error('Assinatura expirada');
+  }
+
   if (!res.ok) {
     const erro = await res.json().catch(() => ({}));
     throw new Error((erro as { erro?: string }).erro || 'Erro na requisição');

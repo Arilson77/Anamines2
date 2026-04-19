@@ -10,7 +10,7 @@
     "dev": "nodemon server.js",
     "lint": "eslint src server.js",
     "format": "prettier --write src server.js",
-    "db:setup": "psql $DATABASE_URL -f schema.sql",
+    "db:setup": "node scripts/migrate.js",
     "test": "NODE_ENV=test jest --runInBand --forceExit"
   },
   "dependencies": {

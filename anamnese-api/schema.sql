@@ -5,13 +5,25 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 1. TENANTS (cada psicanalista/consultório)
 -- =============================================
 CREATE TABLE IF NOT EXISTS tenants (
-  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nome        TEXT NOT NULL,
-  email       TEXT NOT NULL UNIQUE,
-  plano       TEXT NOT NULL DEFAULT 'trial', -- trial | basic | pro
-  ativo       BOOLEAN NOT NULL DEFAULT true,
-  criado_em   TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome                   TEXT NOT NULL,
+  email                  TEXT NOT NULL UNIQUE,
+  plano                  TEXT NOT NULL DEFAULT 'trial', -- trial | basico | pro
+  assinatura_status      TEXT NOT NULL DEFAULT 'trial', -- trial | ativa | expirada | cancelada
+  trial_termina_em       TIMESTAMPTZ NOT NULL DEFAULT (now() + INTERVAL '14 days'),
+  assinatura_termina_em  TIMESTAMPTZ,
+  stripe_customer_id     TEXT,
+  stripe_subscription_id TEXT,
+  ativo                  BOOLEAN NOT NULL DEFAULT true,
+  criado_em              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Adiciona colunas novas em bancos existentes (idempotente)
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS assinatura_status      TEXT NOT NULL DEFAULT 'trial';
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_termina_em       TIMESTAMPTZ NOT NULL DEFAULT (now() + INTERVAL '14 days');
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS assinatura_termina_em  TIMESTAMPTZ;
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS stripe_customer_id     TEXT;
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 
 -- =============================================
 -- 2. USUARIOS
@@ -99,29 +111,11 @@ ALTER TABLE fichas_anamnese     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consentimentos_lgpd ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logs_acesso         ENABLE ROW LEVEL SECURITY;
 
--- Policies (ignorar se já existirem)
 DO $$ BEGIN
-  CREATE POLICY tenant_pacientes ON pacientes
-    USING (tenant_id = current_setting('app.tenant_id')::UUID);
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
-  CREATE POLICY tenant_fichas ON fichas_anamnese
-    USING (tenant_id = current_setting('app.tenant_id')::UUID);
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
-  CREATE POLICY tenant_consentimentos ON consentimentos_lgpd
-    USING (tenant_id = current_setting('app.tenant_id')::UUID);
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
-  CREATE POLICY tenant_logs ON logs_acesso
-    USING (tenant_id = current_setting('app.tenant_id')::UUID);
-EXCEPTION WHEN duplicate_object THEN NULL;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'pacientes'           AND policyname = 'tenant_pacientes')      THEN CREATE POLICY tenant_pacientes      ON pacientes           USING (tenant_id = current_setting('app.tenant_id')::UUID); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'fichas_anamnese'     AND policyname = 'tenant_fichas')         THEN CREATE POLICY tenant_fichas         ON fichas_anamnese     USING (tenant_id = current_setting('app.tenant_id')::UUID); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'consentimentos_lgpd' AND policyname = 'tenant_consentimentos') THEN CREATE POLICY tenant_consentimentos ON consentimentos_lgpd USING (tenant_id = current_setting('app.tenant_id')::UUID); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'logs_acesso'         AND policyname = 'tenant_logs')           THEN CREATE POLICY tenant_logs           ON logs_acesso         USING (tenant_id = current_setting('app.tenant_id')::UUID); END IF;
 END $$;
 
 -- =============================================

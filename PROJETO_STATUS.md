@@ -109,32 +109,37 @@ npm run dev            # porta 3000
 
 ---
 
-## ❌ O QUE FALTA FAZER (por ordem de prioridade)
+## ✅ O QUE JÁ ESTÁ FEITO (atualizado)
 
-### Prioridade 1 — Deploy
+### Deploy (código pronto — execução manual pendente)
 
-- [ ] **Backend no Railway** (railway.app → Deploy from GitHub)
-  - Adicionar variáveis: `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`
-  - Railway provisiona PostgreSQL automaticamente
+- [x] `railway.json` configurado com `releaseCommand` (migração automática)
+- [x] `scripts/migrate.js` — migração via Node.js, sem dependência de psql
+- [x] `schema.sql` idempotente (IF NOT EXISTS + ADD COLUMN IF NOT EXISTS)
+- [x] `vercel.json` configurado
 
-- [ ] **Frontend na Vercel** (vercel.com → importar repo)
-  - Definir `NEXT_PUBLIC_API_URL` apontando para URL do Railway
+### Prioridade 2 — Funcionalidades
 
-- [ ] **CORS configurado**
-  - Atualizar `FRONTEND_URL` no .env para URL real da Vercel
-
-### Prioridade 2 — Funcionalidades restantes
-
-- [ ] **Integração EmailJS no formulário standalone** (`index.html`)
-  - Criar conta em emailjs.com → obter Service ID, Template ID, Public Key
-  - Template HTML em `_docs/emailjs-template.html`
-
-- [ ] **Verificação de JWT no JWT de consentimento**
-  - Considerar invalidar o token JWT de consentimento após uso
+- [x] **EmailJS no formulário standalone** (`index.html`) — IDs reais configurados
+- [x] **Consentimento LGPD idempotente** — POST bloqueia uso duplo (409 se já consentido)
 
 ### Prioridade 3 — SaaS
 
-- [ ] Sistema de planos e assinatura (Stripe ou MercadoPago)
+- [x] **Sistema de planos e assinatura (Stripe)** — checkout, portal, webhook implementados
+- [x] **Guard de trial/plano** — `verificarPlano.js` aplicado em `/pacientes` e `/fichas`
+
+---
+
+## ❌ O QUE FALTA FAZER
+
+### Deploy — execução manual
+
+- [ ] **Backend no Railway**: criar projeto apontando para `anamnese-api/`, adicionar PostgreSQL plugin, configurar variáveis de ambiente
+- [ ] **Frontend na Vercel**: importar repo com root directory `anamnese-web/`, definir `NEXT_PUBLIC_API_URL`
+- [ ] **Stripe webhook**: configurar endpoint no dashboard do Stripe
+
+### Funcionalidades futuras
+
 - [ ] Painel administrativo (ver todos os tenants, métricas)
 - [ ] Múltiplos usuários por tenant (convite por e-mail, papel colaborador)
 

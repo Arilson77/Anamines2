@@ -30,7 +30,7 @@ exports.consultarConsentimento = async (req, res) => {
 };
 
 // POST /publico/consentimento/:token
-// Registra o consentimento do paciente
+// Registra o consentimento do paciente (idempotente — bloqueia uso duplo)
 exports.registrarConsentimento = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -39,6 +39,15 @@ exports.registrarConsentimento = async (req, res) => {
       return res.status(400).json({ erro: 'Token inválido' });
 
     await client.query('SELECT set_config($1, $2, true)', ['app.tenant_id', payload.tenant_id]);
+
+    const { rows: [paciente] } = await client.query(
+      'SELECT consentimento_lgpd FROM pacientes WHERE id = $1',
+      [payload.paciente_id]
+    );
+
+    if (!paciente) return res.status(404).json({ erro: 'Paciente não encontrado' });
+    if (paciente.consentimento_lgpd)
+      return res.status(409).json({ erro: 'Consentimento já registrado anteriormente' });
 
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
     await lgpdService.registrarConsentimento(client, payload.tenant_id, payload.paciente_id, ip);
