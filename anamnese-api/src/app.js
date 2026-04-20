@@ -44,7 +44,11 @@ app.use('/publico',       publicoRoutes);
 app.use('/configuracoes', configRoutes);
 app.use('/cobranca',      cobrancaRoutes);
 
-app.get('/health', (req, res) => res.json({ ok: true }));
+app.get('/health', (req, res) => res.json({
+  ok: true,
+  stripe: !!process.env.STRIPE_SECRET_KEY,
+  stripe_prefix: process.env.STRIPE_SECRET_KEY?.slice(0, 7) || 'não definida',
+}));
 if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
 app.use(erros);
 
