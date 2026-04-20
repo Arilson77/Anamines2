@@ -21,7 +21,12 @@ async function iniciar() {
     await pool.end();
   }
 
-  app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`API rodando na porta ${PORT}`);
+    console.log('[ENV] STRIPE_SECRET_KEY:', process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.slice(0, 10) + '...' : 'NÃO DEFINIDA');
+    console.log('[ENV] STRIPE_PRICE_BASICO:', process.env.STRIPE_PRICE_BASICO || 'NÃO DEFINIDA');
+    console.log('[ENV] FRONTEND_URL:', process.env.FRONTEND_URL || 'NÃO DEFINIDA');
+  });
 }
 
 iniciar();
