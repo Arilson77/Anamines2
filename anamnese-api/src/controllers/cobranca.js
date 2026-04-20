@@ -1,8 +1,10 @@
 const pool    = require('../config/db');
 const logsnag = require('../config/logsnag');
-const stripe  = process.env.STRIPE_SECRET_KEY
-  ? require('stripe')(process.env.STRIPE_SECRET_KEY)
-  : null;
+
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) return null;
+  return require('stripe')(process.env.STRIPE_SECRET_KEY);
+}
 
 const PLANOS = {
   basico: { nome: 'Básico', preco: 'R$ 49/mês', price_id: process.env.STRIPE_PRICE_BASICO },
@@ -35,6 +37,7 @@ exports.status = async (req, res, next) => {
 
 // POST /cobranca/checkout — cria sessão de pagamento Stripe
 exports.checkout = async (req, res, next) => {
+  const stripe = getStripe();
   if (!stripe) return res.status(503).json({ erro: 'Pagamentos não configurados ainda.' });
 
   const { plano } = req.body;
@@ -46,7 +49,6 @@ exports.checkout = async (req, res, next) => {
       [req.usuario.tenant_id]
     );
 
-    // Cria ou reutiliza customer no Stripe
     let customerId = tenant.stripe_customer_id;
     if (!customerId) {
       const customer = await stripe.customers.create({ email: tenant.email });
@@ -74,6 +76,7 @@ exports.checkout = async (req, res, next) => {
 
 // POST /cobranca/portal — abre portal de gestão da assinatura
 exports.portal = async (req, res, next) => {
+  const stripe = getStripe();
   if (!stripe) return res.status(503).json({ erro: 'Pagamentos não configurados ainda.' });
 
   try {
@@ -98,6 +101,7 @@ exports.portal = async (req, res, next) => {
 
 // POST /cobranca/webhook — eventos Stripe (body raw obrigatório)
 exports.webhook = async (req, res) => {
+  const stripe = getStripe();
   if (!stripe) return res.sendStatus(200);
 
   const sig = req.headers['stripe-signature'];
