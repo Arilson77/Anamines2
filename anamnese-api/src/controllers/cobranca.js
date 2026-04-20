@@ -40,7 +40,8 @@ exports.status = async (req, res, next) => {
 
 // POST /cobranca/checkout — cria sessão de pagamento Stripe
 exports.checkout = async (req, res, next) => {
-  console.log('[checkout] requisição recebida, plano:', req.body?.plano);
+  console.log('[checkout] plano:', req.body?.plano);
+  console.log('[checkout] STRIPE_SECRET_KEY direto:', process.env.STRIPE_SECRET_KEY?.slice(0, 10) || 'VAZIO');
   const stripe = getStripe();
   console.log('[checkout] stripe inicializado:', !!stripe);
   if (!stripe) return res.status(503).json({ erro: 'Pagamentos não configurados ainda.' });
