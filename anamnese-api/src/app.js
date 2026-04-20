@@ -32,6 +32,7 @@ const allowedOrigin = (origin, callback) => {
     callback(new Error(`CORS bloqueado para origem: ${origin}`));
   }
 };
+app.set('trust proxy', 1);
 app.use(cors({ origin: allowedOrigin, credentials: true }));
 
 app.use('/cobranca/webhook', express.raw({ type: 'application/json' }));
