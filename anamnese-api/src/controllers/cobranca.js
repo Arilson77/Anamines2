@@ -14,8 +14,11 @@ function getStripe() {
 }
 
 const PLANOS = {
-  basico: { nome: 'Básico', preco: 'R$ 49/mês', price_id: process.env.STRIPE_PRICE_BASICO },
-  pro:    { nome: 'Pro',    preco: 'R$ 99/mês', price_id: process.env.STRIPE_PRICE_PRO    },
+  basico:     { nome: 'Básico',      preco: 'R$ 49/mês',  limite_usuarios: 1,  price_id: process.env.STRIPE_PRICE_BASICO     },
+  pro:        { nome: 'Pro',         preco: 'R$ 99/mês',  limite_usuarios: 1,  price_id: process.env.STRIPE_PRICE_PRO        },
+  clinica_s:  { nome: 'Clínica S',   preco: 'R$ 199/mês', limite_usuarios: 5,  price_id: process.env.STRIPE_PRICE_CLINICA_S  },
+  clinica_m:  { nome: 'Clínica M',   preco: 'R$ 349/mês', limite_usuarios: 10, price_id: process.env.STRIPE_PRICE_CLINICA_M  },
+  clinica_l:  { nome: 'Clínica L',   preco: 'R$ 499/mês', limite_usuarios: 15, price_id: process.env.STRIPE_PRICE_CLINICA_L  },
 };
 
 // GET /cobranca/status — retorna status da assinatura do tenant
@@ -138,14 +141,16 @@ exports.webhook = async (req, res) => {
           console.error('[webhook] checkout.session.completed sem metadata:', obj.id);
           break;
         }
+        const limiteUsuarios = PLANOS[plano]?.limite_usuarios ?? 1;
         await pool.query(
           `UPDATE tenants SET
              plano                  = $1,
              assinatura_status      = 'ativa',
              stripe_subscription_id = $2,
-             assinatura_termina_em  = NULL
-           WHERE id = $3`,
-          [plano, obj.subscription, tenant_id]
+             assinatura_termina_em  = NULL,
+             limite_usuarios        = $3
+           WHERE id = $4`,
+          [plano, obj.subscription, limiteUsuarios, tenant_id]
         );
         await logsnag.track({
           channel:     'assinaturas',

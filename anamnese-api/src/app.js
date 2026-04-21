@@ -13,6 +13,7 @@ const fichasRoutes    = require('./routes/fichas');
 const publicoRoutes   = require('./routes/publico');
 const configRoutes    = require('./routes/configuracoes');
 const cobrancaRoutes  = require('./routes/cobranca');
+const usuariosRoutes  = require('./routes/usuarios');
 const erros           = require('./middleware/erros');
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/fichas',        fichasRoutes);
 app.use('/publico',       publicoRoutes);
 app.use('/configuracoes', configRoutes);
 app.use('/cobranca',      cobrancaRoutes);
+app.use('/usuarios',      usuariosRoutes);
 
 app.get('/health', (req, res) => res.json({
   ok: true,

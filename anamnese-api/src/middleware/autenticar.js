@@ -10,8 +10,10 @@ async function autenticar(req, res, next) {
     const payload = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
 
     const client = await pool.connect();
-    // Usa set_config para evitar SQL injection ao injetar o tenant_id
-    await client.query('SELECT set_config($1, $2, true)', ['app.tenant_id', payload.tenant_id]);
+    await client.query(
+      'SELECT set_config($1,$2,true), set_config($3,$4,true), set_config($5,$6,true)',
+      ['app.tenant_id', payload.tenant_id, 'app.usuario_id', payload.usuario_id, 'app.papel', payload.papel]
+    );
 
     req.usuario  = payload;
     req.dbClient = client;

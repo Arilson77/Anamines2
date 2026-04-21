@@ -105,3 +105,46 @@ exports.redefinirSenha = async (req, res, next) => {
     res.json({ mensagem: 'Senha redefinida com sucesso.' });
   } catch (err) { next(err); }
 };
+
+exports.aceitarConvite = async (req, res, next) => {
+  const { token, nome, senha } = req.body;
+  try {
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      return res.status(400).json({ erro: 'Convite inválido ou expirado.' });
+    }
+
+    if (payload.tipo !== 'convite')
+      return res.status(400).json({ erro: 'Link inválido.' });
+
+    const { rows: [convite] } = await pool.query(
+      'SELECT id, usado, expira_em FROM convites WHERE id = $1 AND tenant_id = $2',
+      [payload.convite_id, payload.tenant_id]
+    );
+
+    if (!convite)        return res.status(400).json({ erro: 'Convite não encontrado.' });
+    if (convite.usado)   return res.status(409).json({ erro: 'Este convite já foi utilizado.' });
+    if (new Date() > new Date(convite.expira_em))
+      return res.status(400).json({ erro: 'Convite expirado.' });
+
+    const { rows: existente } = await pool.query(
+      'SELECT id FROM usuarios WHERE email = $1',
+      [payload.email]
+    );
+    if (existente.length)
+      return res.status(409).json({ erro: 'Este e-mail já possui uma conta.' });
+
+    const hash = await bcrypt.hash(senha, 12);
+    await pool.query(
+      `INSERT INTO usuarios (tenant_id, nome, email, senha_hash, papel)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [payload.tenant_id, nome, payload.email, hash, payload.papel]
+    );
+
+    await pool.query('UPDATE convites SET usado = true WHERE id = $1', [convite.id]);
+
+    res.status(201).json({ mensagem: 'Conta criada com sucesso. Faça login para continuar.' });
+  } catch (err) { next(err); }
+};

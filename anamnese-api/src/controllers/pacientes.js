@@ -26,9 +26,9 @@ exports.criar = async (req, res, next) => {
   const { nome, email, telefone, data_nascimento } = req.body;
   try {
     const { rows } = await req.dbClient.query(
-      `INSERT INTO pacientes (tenant_id, nome, email, telefone, data_nascimento)
-       VALUES ($1,$2,$3,$4,$5) RETURNING id, nome, criado_em`,
-      [req.usuario.tenant_id, nome, email, telefone, data_nascimento]
+      `INSERT INTO pacientes (tenant_id, profissional_id, nome, email, telefone, data_nascimento)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, nome, criado_em`,
+      [req.usuario.tenant_id, req.usuario.usuario_id, nome, email, telefone, data_nascimento]
     );
     await lgpdService.log(req.dbClient, req.usuario, 'criou_paciente', `paciente:${rows[0].id}`);
     res.status(201).json(rows[0]);

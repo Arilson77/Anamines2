@@ -7,7 +7,8 @@ import { salvarToken } from '@/lib/auth';
 function LoginForm() {
   const router     = useRouter();
   const params     = useSearchParams();
-  const redefinida = params.get('redefinida') === '1';
+  const redefinida  = params.get('redefinida') === '1';
+  const conviteAceito = params.get('convite') === '1';
   const [email,   setEmail]   = useState('');
   const [senha,   setSenha]   = useState('');
   const [erro,    setErro]    = useState('');
@@ -41,6 +42,11 @@ function LoginForm() {
         {redefinida && (
           <div className="bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 mb-4 text-sm text-teal-700 text-center">
             Senha redefinida com sucesso. Faça login.
+          </div>
+        )}
+        {conviteAceito && (
+          <div className="bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 mb-4 text-sm text-teal-700 text-center">
+            Conta criada com sucesso. Faça login para continuar.
           </div>
         )}
 

@@ -51,6 +51,14 @@ export type Paciente = {
   criado_em: string;
 };
 
+export type Usuario = {
+  id: string;
+  nome: string;
+  email: string;
+  papel: 'admin' | 'colaborador';
+  criado_em: string;
+};
+
 export type Ficha = {
   id: string;
   paciente_id: string;

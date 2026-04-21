@@ -38,7 +38,10 @@ exports.registrarConsentimento = async (req, res) => {
     if (payload.tipo !== 'lgpd_consent')
       return res.status(400).json({ erro: 'Token inválido' });
 
-    await client.query('SELECT set_config($1, $2, true)', ['app.tenant_id', payload.tenant_id]);
+    await client.query(
+      'SELECT set_config($1,$2,true), set_config($3,$4,true)',
+      ['app.tenant_id', payload.tenant_id, 'app.papel', 'admin']
+    );
 
     const { rows: [paciente] } = await client.query(
       'SELECT consentimento_lgpd FROM pacientes WHERE id = $1',

@@ -55,9 +55,9 @@ exports.criar = async (req, res, next) => {
   const { paciente_id, dados } = req.body;
   try {
     const { rows } = await req.dbClient.query(
-      `INSERT INTO fichas_anamnese (tenant_id, paciente_id, dados)
-       VALUES ($1,$2,$3) RETURNING id, criado_em`,
-      [req.usuario.tenant_id, paciente_id, JSON.stringify(dados)]
+      `INSERT INTO fichas_anamnese (tenant_id, profissional_id, paciente_id, dados)
+       VALUES ($1,$2,$3,$4) RETURNING id, criado_em`,
+      [req.usuario.tenant_id, req.usuario.usuario_id, paciente_id, JSON.stringify(dados)]
     );
     await lgpdService.log(req.dbClient, req.usuario, 'criou_ficha', `ficha:${rows[0].id}`);
     res.status(201).json(rows[0]);

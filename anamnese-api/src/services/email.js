@@ -38,6 +38,24 @@ exports.avisarTrialExpirando = async (email, nome, diasRestantes) => {
   });
 };
 
+exports.enviarConvite = async (emailConvidado, nomeConsultorio, link) => {
+  await transporter.sendMail({
+    from:    `"Anamnese" <${process.env.SMTP_USER}>`,
+    to:      emailConvidado,
+    subject: `Você foi convidado para ${nomeConsultorio}`,
+    text: [
+      `Olá!`,
+      '',
+      `Você foi convidado para fazer parte do consultório "${nomeConsultorio}" no Anamnese.`,
+      'Clique no link abaixo para criar sua conta (válido por 7 dias):',
+      '',
+      link,
+      '',
+      'Se não reconhece este convite, ignore este e-mail.',
+    ].join('\n'),
+  });
+};
+
 exports.enviarRedefinicaoSenha = async (email, nome, link) => {
   await transporter.sendMail({
     from:    `"Anamnese" <${process.env.SMTP_USER}>`,

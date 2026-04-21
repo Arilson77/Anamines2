@@ -6,5 +6,6 @@ router.post('/login',           loginLimiter,    ctrl.login);
 router.post('/cadastro',        cadastroLimiter, ctrl.cadastro);
 router.post('/esqueceu-senha',  loginLimiter,    ctrl.esqueceuSenha);
 router.post('/redefinir-senha', loginLimiter,    ctrl.redefinirSenha);
+router.post('/aceitar-convite', cadastroLimiter, ctrl.aceitarConvite);
 
 module.exports = router;

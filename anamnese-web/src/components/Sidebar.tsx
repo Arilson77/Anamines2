@@ -1,18 +1,22 @@
 'use client';
 import { usePathname, useRouter } from 'next/navigation';
-import { removerToken } from '@/lib/auth';
+import { removerToken, obterUsuario } from '@/lib/auth';
 
-const LINKS = [
-  { href: '/',               label: 'Início',        icone: '⌂' },
-  { href: '/pacientes',      label: 'Pacientes',     icone: '♡' },
-  { href: '/fichas',         label: 'Fichas',        icone: '☰' },
-  { href: '/configuracoes',  label: 'Configurações', icone: '⚙' },
-  { href: '/assinatura',     label: 'Assinatura',    icone: '★' },
+const LINKS_BASE = [
+  { href: '/',               label: 'Início',        icone: '⌂', apenasAdmin: false },
+  { href: '/pacientes',      label: 'Pacientes',     icone: '♡', apenasAdmin: false },
+  { href: '/fichas',         label: 'Fichas',        icone: '☰', apenasAdmin: false },
+  { href: '/configuracoes',  label: 'Configurações', icone: '⚙', apenasAdmin: false },
+  { href: '/configuracoes/usuarios', label: 'Equipe', icone: '👥', apenasAdmin: true },
+  { href: '/assinatura',     label: 'Assinatura',    icone: '★', apenasAdmin: true  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
+  const usuario  = obterUsuario();
+  const isAdmin  = usuario?.papel === 'admin';
+  const LINKS    = LINKS_BASE.filter(l => !l.apenasAdmin || isAdmin);
 
   function sair() {
     removerToken();
