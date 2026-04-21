@@ -50,6 +50,18 @@ app.get('/health', (req, res) => res.json({
   stripe: !!process.env.STRIPE_SECRET_KEY,
   stripe_prefix: process.env.STRIPE_SECRET_KEY?.slice(0, 7) || 'não definida',
 }));
+
+app.get('/health/stripe', async (req, res) => {
+  const https = require('https');
+  const result = await new Promise((resolve) => {
+    const req = https.get('https://api.stripe.com', { timeout: 5000 }, (r) => {
+      resolve({ ok: true, status: r.statusCode });
+    });
+    req.on('error', (e) => resolve({ ok: false, error: e.code, message: e.message }));
+    req.on('timeout', () => { req.destroy(); resolve({ ok: false, error: 'TIMEOUT' }); });
+  });
+  res.json(result);
+});
 if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
 app.use(erros);
 

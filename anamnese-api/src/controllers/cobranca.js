@@ -6,7 +6,7 @@ function getStripe() {
   console.log('[Stripe] key presente:', !!key, '| prefixo:', key?.slice(0, 7));
   if (!key) return null;
   const Stripe = require('stripe');
-  return new Stripe(key);
+  return new Stripe(key, { maxNetworkRetries: 3, timeout: 30000 });
 }
 
 const PLANOS = {
@@ -76,6 +76,12 @@ exports.checkout = async (req, res, next) => {
 
     res.json({ url: session.url });
   } catch (err) {
+    console.error('[Stripe checkout error]', {
+      type: err.type,
+      code: err.code,
+      message: err.message,
+      cause: err.cause?.code || err.cause?.message,
+    });
     next(err);
   }
 };
