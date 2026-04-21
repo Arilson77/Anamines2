@@ -18,3 +18,40 @@ exports.notificarNovaFicha = async (emailTerapeuta, nomePaciente) => {
     // Nunca enviar dados clínicos por e-mail!
   });
 };
+
+exports.avisarTrialExpirando = async (email, nome, diasRestantes) => {
+  const base = process.env.FRONTEND_URL || 'http://localhost:3000';
+  await transporter.sendMail({
+    from:    `"Anamnese" <${process.env.SMTP_USER}>`,
+    to:      email,
+    subject: `Seu trial encerra em ${diasRestantes} ${diasRestantes === 1 ? 'dia' : 'dias'}`,
+    text: [
+      `Olá, ${nome}!`,
+      '',
+      `Seu período de trial gratuito encerra em ${diasRestantes} ${diasRestantes === 1 ? 'dia' : 'dias'}.`,
+      'Para continuar usando o Anamnese sem interrupção, escolha um plano:',
+      '',
+      `${base}/planos`,
+      '',
+      'Qualquer dúvida, responda este e-mail.',
+    ].join('\n'),
+  });
+};
+
+exports.enviarRedefinicaoSenha = async (email, nome, link) => {
+  await transporter.sendMail({
+    from:    `"Anamnese" <${process.env.SMTP_USER}>`,
+    to:      email,
+    subject: 'Redefinição de senha',
+    text: [
+      `Olá, ${nome}!`,
+      '',
+      'Recebemos uma solicitação para redefinir a senha da sua conta.',
+      'Clique no link abaixo (válido por 1 hora):',
+      '',
+      link,
+      '',
+      'Se não foi você, ignore este e-mail.',
+    ].join('\n'),
+  });
+};

@@ -13,10 +13,12 @@ export default function DashboardPage() {
     api.get<Ficha[]>('/fichas').then(setFichas).catch(console.error);
   }, []);
 
+  const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const cards = [
-    { label: 'Pacientes',       valor: pacientes.length,                                    cor: 'bg-teal-50  border-teal-200'   },
-    { label: 'Fichas enviadas', valor: fichas.filter(f => f.status === 'enviada').length,   cor: 'bg-stone-50 border-stone-200' },
-    { label: 'Rascunhos',       valor: fichas.filter(f => f.status === 'rascunho').length,  cor: 'bg-amber-50 border-amber-200' },
+    { label: 'Pacientes',       valor: pacientes.length,                                                        cor: 'bg-teal-50  border-teal-200'  },
+    { label: 'Fichas enviadas', valor: fichas.filter(f => f.status === 'enviada').length,                       cor: 'bg-stone-50 border-stone-200' },
+    { label: 'Fichas este mês', valor: fichas.filter(f => new Date(f.criado_em) >= inicioMes).length,          cor: 'bg-sky-50   border-sky-200'   },
+    { label: 'LGPD pendente',   valor: pacientes.filter(p => !p.consentimento_lgpd).length,                    cor: 'bg-amber-50 border-amber-200' },
   ];
 
   return (
@@ -26,7 +28,7 @@ export default function DashboardPage() {
       </h1>
       <p className="text-stone-400 text-sm mb-8">Aqui está um resumo do seu consultório.</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {cards.map(c => (
           <div key={c.label} className={`rounded-2xl border p-6 ${c.cor}`}>
             <p className="text-xs uppercase tracking-widest text-stone-400 mb-1">{c.label}</p>

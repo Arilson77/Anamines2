@@ -5,8 +5,9 @@ import { api } from '@/lib/api';
 import { salvarToken } from '@/lib/auth';
 
 function LoginForm() {
-  const router  = useRouter();
-  const params  = useSearchParams();
+  const router     = useRouter();
+  const params     = useSearchParams();
+  const redefinida = params.get('redefinida') === '1';
   const [email,   setEmail]   = useState('');
   const [senha,   setSenha]   = useState('');
   const [erro,    setErro]    = useState('');
@@ -37,6 +38,12 @@ function LoginForm() {
           <p className="text-sm text-stone-400 mt-1 tracking-widest uppercase">Área do profissional</p>
         </div>
 
+        {redefinida && (
+          <div className="bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 mb-4 text-sm text-teal-700 text-center">
+            Senha redefinida com sucesso. Faça login.
+          </div>
+        )}
+
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">E-mail</label>
@@ -54,6 +61,12 @@ function LoginForm() {
           </div>
 
           {erro && <p className="text-red-500 text-sm">{erro}</p>}
+
+          <div className="text-right">
+            <a href="/esqueci-senha" className="text-xs text-stone-400 hover:text-stone-600 underline">
+              Esqueci minha senha
+            </a>
+          </div>
 
           <button type="submit" disabled={loading}
             className="w-full bg-stone-800 text-white rounded-full py-3 text-sm font-medium tracking-widest uppercase hover:bg-stone-700 transition disabled:opacity-50">

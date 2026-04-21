@@ -55,6 +55,7 @@ export type Ficha = {
   id: string;
   paciente_id: string;
   paciente: string;
+  consentimento_lgpd: boolean;
   status: 'rascunho' | 'enviada' | 'arquivada';
   dados: Record<string, unknown>;
   criado_em: string;

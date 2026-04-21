@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { api, Ficha } from '@/lib/api';
 import { obterToken } from '@/lib/auth';
 
@@ -66,6 +66,7 @@ const SECOES: { titulo: string; campos: { campo: string; label: string }[] }[] =
 
 export default function DetalheFichaPage() {
   const { id }  = useParams<{ id: string }>();
+  const router  = useRouter();
   const [ficha,   setFicha]   = useState<Ficha | null>(null);
   const [loading, setLoading] = useState(false);
   const [erro,    setErro]    = useState('');
@@ -73,6 +74,19 @@ export default function DetalheFichaPage() {
   useEffect(() => {
     api.get<Ficha>(`/fichas/${id}`).then(setFicha).catch(() => setErro('Ficha não encontrada'));
   }, [id]);
+
+  async function deletar() {
+    if (!ficha) return;
+    if (!confirm(`Excluir a ficha de ${ficha.paciente}? Esta ação não pode ser desfeita.`)) return;
+    setLoading(true);
+    try {
+      await api.delete(`/fichas/${id}`);
+      router.push('/fichas');
+    } catch {
+      setErro('Erro ao excluir ficha');
+      setLoading(false);
+    }
+  }
 
   async function arquivar() {
     if (!ficha) return;
@@ -125,6 +139,11 @@ export default function DetalheFichaPage() {
           ficha.status === 'rascunho' ? 'bg-amber-100 text-amber-700' :
           'bg-stone-100 text-stone-500'
         }`}>{ficha.status}</span>
+        <span className={`text-xs px-3 py-1 rounded-full ${
+          ficha.consentimento_lgpd ? 'bg-teal-50 text-teal-600' : 'bg-amber-50 text-amber-600'
+        }`}>
+          LGPD {ficha.consentimento_lgpd ? '✓' : 'pendente'}
+        </span>
       </div>
 
       <div className="flex gap-2 mb-8">
@@ -142,6 +161,10 @@ export default function DetalheFichaPage() {
             {loading ? '…' : 'Arquivar'}
           </button>
         )}
+        <button onClick={deletar} disabled={loading}
+          className="text-xs px-4 py-2 border border-red-200 rounded-full text-red-400 hover:bg-red-50 disabled:opacity-50 transition">
+          Excluir
+        </button>
         <span className="text-xs px-4 py-2 border border-stone-100 rounded-full text-stone-400">
           {new Date(ficha.criado_em).toLocaleDateString('pt-BR')}
         </span>

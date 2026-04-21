@@ -39,7 +39,7 @@ exports.listar = async (req, res, next) => {
 exports.buscar = async (req, res, next) => {
   try {
     const { rows } = await req.dbClient.query(
-      `SELECT f.*, p.nome AS paciente
+      `SELECT f.*, p.nome AS paciente, p.consentimento_lgpd
        FROM fichas_anamnese f
        JOIN pacientes p ON p.id = f.paciente_id
        WHERE f.id = $1`,
@@ -75,6 +75,18 @@ exports.atualizar = async (req, res, next) => {
     if (!rows.length) return res.status(404).json({ erro: 'Ficha não encontrada' });
     await lgpdService.log(req.dbClient, req.usuario, 'editou_ficha', `ficha:${rows[0].id}`);
     res.json(rows[0]);
+  } catch (err) { next(err); }
+};
+
+exports.remover = async (req, res, next) => {
+  try {
+    const { rowCount } = await req.dbClient.query(
+      'DELETE FROM fichas_anamnese WHERE id = $1',
+      [req.params.id]
+    );
+    if (!rowCount) return res.status(404).json({ erro: 'Ficha não encontrada' });
+    await lgpdService.log(req.dbClient, req.usuario, 'removeu_ficha', `ficha:${req.params.id}`);
+    res.status(204).send();
   } catch (err) { next(err); }
 };
 
