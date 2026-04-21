@@ -3,7 +3,6 @@ const logsnag = require('../config/logsnag');
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
-  console.log('[Stripe] key presente:', !!key, '| prefixo:', key?.slice(0, 7));
   if (!key) return null;
   const Stripe = require('stripe');
   const https  = require('https');
@@ -45,10 +44,7 @@ exports.status = async (req, res, next) => {
 
 // POST /cobranca/checkout — cria sessão de pagamento Stripe
 exports.checkout = async (req, res, next) => {
-  console.log('[checkout] plano:', req.body?.plano);
-  console.log('[checkout] STRIPE_SECRET_KEY direto:', process.env.STRIPE_SECRET_KEY?.slice(0, 10) || 'VAZIO');
   const stripe = getStripe();
-  console.log('[checkout] stripe inicializado:', !!stripe);
   if (!stripe) return res.status(503).json({ erro: 'Pagamentos não configurados ainda.' });
 
   const { plano } = req.body;
