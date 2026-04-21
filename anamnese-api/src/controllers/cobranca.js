@@ -6,7 +6,12 @@ function getStripe() {
   console.log('[Stripe] key presente:', !!key, '| prefixo:', key?.slice(0, 7));
   if (!key) return null;
   const Stripe = require('stripe');
-  return new Stripe(key, { maxNetworkRetries: 3, timeout: 30000 });
+  const https  = require('https');
+  return new Stripe(key, {
+    maxNetworkRetries: 3,
+    timeout: 30000,
+    httpClient: Stripe.createNodeHttpClient(new https.Agent({ keepAlive: false })),
+  });
 }
 
 const PLANOS = {
@@ -80,7 +85,7 @@ exports.checkout = async (req, res, next) => {
       type: err.type,
       code: err.code,
       message: err.message,
-      cause: err.cause?.code || err.cause?.message,
+      detail: err.detail?.code || err.detail?.message || String(err.detail),
     });
     next(err);
   }
