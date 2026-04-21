@@ -27,6 +27,10 @@ async function verificarPlano(req, res, next) {
       });
     }
 
+    if (tenant.assinatura_status === 'inadimplente') {
+      res.setHeader('X-Aviso', 'PAGAMENTO_PENDENTE');
+    }
+
     next();
   } catch (err) {
     next(err);

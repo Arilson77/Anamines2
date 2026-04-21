@@ -13,8 +13,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     api.get<StatusPlano>('/cobranca/status').then(setPlano).catch(() => null);
   }, []);
 
-  const mostrarBanner = plano?.status === 'trial' && (plano.dias_restantes ?? 0) <= 7;
-  const expirado      = plano?.status === 'expirada';
+  const mostrarBanner    = plano?.status === 'trial' && (plano.dias_restantes ?? 0) <= 7;
+  const expirado         = plano?.status === 'expirada';
+  const inadimplente     = plano?.status === 'inadimplente';
 
   return (
     <div className="flex min-h-screen bg-stone-50">
@@ -26,7 +27,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Link href="/planos" className="underline font-semibold">Assine agora para continuar usando</Link>.
           </div>
         )}
-        {mostrarBanner && !expirado && (
+        {inadimplente && (
+          <div className="bg-orange-500 text-white text-sm text-center py-2 px-4">
+            Pagamento pendente. Atualize seu método de pagamento para evitar a suspensão da conta.{' '}
+            <Link href="/assinatura" className="underline font-semibold">Gerenciar assinatura</Link>
+          </div>
+        )}
+        {mostrarBanner && !expirado && !inadimplente && (
           <div className="bg-amber-500 text-white text-sm text-center py-2 px-4">
             Trial encerra em <strong>{plano!.dias_restantes} {plano!.dias_restantes === 1 ? 'dia' : 'dias'}</strong>.{' '}
             <Link href="/planos" className="underline font-semibold">Ver planos</Link>
