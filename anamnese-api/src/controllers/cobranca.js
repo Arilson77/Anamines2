@@ -2,7 +2,7 @@ const pool    = require('../config/db');
 const logsnag = require('../config/logsnag');
 
 function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
+  const key = process.env.STRIPE_SECRET_KEY?.trim();
   console.log('[Stripe] key presente:', !!key, '| prefixo:', key?.slice(0, 7));
   if (!key) return null;
   const Stripe = require('stripe');
