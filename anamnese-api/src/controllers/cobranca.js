@@ -133,7 +133,11 @@ exports.webhook = async (req, res) => {
   try {
     switch (evento.type) {
       case 'checkout.session.completed': {
-        const { tenant_id, plano } = obj.metadata;
+        const { tenant_id, plano } = obj.metadata || {};
+        if (!tenant_id || !plano) {
+          console.error('[webhook] checkout.session.completed sem metadata:', obj.id);
+          break;
+        }
         await pool.query(
           `UPDATE tenants SET
              plano                  = $1,
@@ -167,7 +171,10 @@ exports.webhook = async (req, res) => {
         break;
       }
       case 'customer.subscription.updated': {
-        const status = obj.status === 'active' ? 'ativa' : 'expirada';
+        // past_due e unpaid mantêm acesso — Stripe retentar cobrança automaticamente
+        const status = obj.status === 'active' ? 'ativa'
+          : obj.status === 'canceled'           ? 'expirada'
+          : 'inadimplente';
         const termina = obj.current_period_end
           ? new Date(obj.current_period_end * 1000)
           : null;
@@ -180,7 +187,8 @@ exports.webhook = async (req, res) => {
       }
     }
   } catch (err) {
-    console.error('Erro ao processar webhook:', err.message);
+    console.error('[webhook] Erro ao processar evento', evento.type, ':', err.message);
+    return res.sendStatus(500);
   }
 
   res.sendStatus(200);
