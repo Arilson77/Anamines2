@@ -144,28 +144,25 @@ ALTER TABLE consentimentos_lgpd ENABLE ROW LEVEL SECURITY;
 ALTER TABLE logs_acesso         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE convites            ENABLE ROW LEVEL SECURITY;
 
--- Remove políticas antigas de pacientes/fichas para recriar com isolamento por profissional
-DROP POLICY IF EXISTS tenant_pacientes ON pacientes;
-DROP POLICY IF EXISTS tenant_fichas    ON fichas_anamnese;
-
 DO $$ BEGIN
-  -- pacientes: profissional vê os seus, admin vê todos do tenant
+  -- Recria políticas de pacientes/fichas com isolamento por profissional
+  DROP POLICY IF EXISTS tenant_pacientes ON pacientes;
+  DROP POLICY IF EXISTS tenant_fichas    ON fichas_anamnese;
   CREATE POLICY tenant_pacientes ON pacientes USING (
     tenant_id = current_setting('app.tenant_id', true)::UUID AND (
       profissional_id = current_setting('app.usuario_id', true)::UUID OR
       current_setting('app.papel', true) = 'admin'
     )
   );
-  -- fichas: idem
   CREATE POLICY tenant_fichas ON fichas_anamnese USING (
     tenant_id = current_setting('app.tenant_id', true)::UUID AND (
       profissional_id = current_setting('app.usuario_id', true)::UUID OR
       current_setting('app.papel', true) = 'admin'
     )
   );
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'consentimentos_lgpd' AND policyname = 'tenant_consentimentos') THEN CREATE POLICY tenant_consentimentos ON consentimentos_lgpd USING (tenant_id = current_setting('app.tenant_id', true)::UUID); END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'logs_acesso'         AND policyname = 'tenant_logs')           THEN CREATE POLICY tenant_logs           ON logs_acesso         USING (tenant_id = current_setting('app.tenant_id', true)::UUID); END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'convites'            AND policyname = 'tenant_convites')       THEN CREATE POLICY tenant_convites       ON convites            USING (tenant_id = current_setting('app.tenant_id', true)::UUID); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='consentimentos_lgpd' AND policyname='tenant_consentimentos') THEN CREATE POLICY tenant_consentimentos ON consentimentos_lgpd USING (tenant_id = current_setting('app.tenant_id',true)::UUID); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='logs_acesso'         AND policyname='tenant_logs')           THEN CREATE POLICY tenant_logs           ON logs_acesso         USING (tenant_id = current_setting('app.tenant_id',true)::UUID); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='convites'            AND policyname='tenant_convites')       THEN CREATE POLICY tenant_convites       ON convites            USING (tenant_id = current_setting('app.tenant_id',true)::UUID); END IF;
 END $$;
 
 -- =============================================
