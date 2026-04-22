@@ -1,6 +1,7 @@
 const cron    = require('node-cron');
 const pool    = require('../config/db');
 const emailSvc = require('./email');
+const waSvc   = require('./whatsapp');
 
 async function processarMensagens() {
   const client = await pool.connect();
@@ -8,7 +9,7 @@ async function processarMensagens() {
     const { rows: mensagens } = await client.query(`
       SELECT mf.*,
         c.token_precadastro, c.requer_preparacao, c.data_hora, c.data_hora_preparacao, c.status AS consulta_status,
-        p.nome AS paciente_nome, p.email AS paciente_email,
+        p.nome AS paciente_nome, p.email AS paciente_email, p.telefone AS paciente_telefone,
         u.nome AS profissional_nome,
         t.nome AS clinica_nome,
         pr.instrucoes_preparacao
@@ -21,43 +22,56 @@ async function processarMensagens() {
       WHERE mf.status = 'pendente' AND mf.enviar_em <= NOW() AND mf.tentativas < 3
     `);
 
+    // Verifica se WhatsApp está conectado (uma vez por ciclo)
+    const waStatus = waSvc.configurado() ? await waSvc.status() : { estado: 'nao_configurado' };
+    const waOnline = waStatus.estado === 'open';
+
     for (const msg of mensagens) {
       try {
-        if (!msg.paciente_email) continue;
         const base            = process.env.FRONTEND_URL || 'http://localhost:3000';
         const linkConfirmar   = `${base}/confirmar-consulta/${msg.token_precadastro}`;
         const linkPrecadastro = `${base}/pre-cadastro/${msg.token_precadastro}`;
 
-        if (msg.tipo === 'confirmacao_consulta') {
-          await emailSvc.enviarConfirmacaoConsulta({
-            email:            msg.paciente_email,
-            nomePaciente:     msg.paciente_nome,
-            nomeProfissional: msg.profissional_nome,
-            nomeClinica:      msg.clinica_nome,
-            dataHora:         msg.data_hora,
-            requerPreparacao: msg.requer_preparacao,
-            dataPreparacao:   msg.data_hora_preparacao,
-            linkConfirmar,
-          });
-        } else if (msg.tipo === 'aviso_preparacao') {
-          await emailSvc.enviarAvisoPreparacao({
-            email:          msg.paciente_email,
-            nomePaciente:   msg.paciente_nome,
-            nomeClinica:    msg.clinica_nome,
-            dataHora:       msg.data_hora,
-            dataPreparacao: msg.data_hora_preparacao,
-            instrucoes:     msg.instrucoes_preparacao,
-          });
-        } else if (msg.tipo === 'ficha_precadastro') {
-          await emailSvc.enviarFichaPrecadastro({
-            email:            msg.paciente_email,
-            nomePaciente:     msg.paciente_nome,
-            nomeClinica:      msg.clinica_nome,
-            dataHora:         msg.data_hora,
-            requerPreparacao: msg.requer_preparacao,
-            instrucoes:       msg.instrucoes_preparacao,
-            linkPrecadastro,
-          });
+        const params = {
+          nomePaciente:     msg.paciente_nome,
+          nomeProfissional: msg.profissional_nome,
+          nomeClinica:      msg.clinica_nome,
+          dataHora:         msg.data_hora,
+          requerPreparacao: msg.requer_preparacao,
+          dataPreparacao:   msg.data_hora_preparacao,
+          instrucoes:       msg.instrucoes_preparacao,
+          linkConfirmar,
+          linkPrecadastro,
+        };
+
+        // Envia WhatsApp se disponível e paciente tem telefone
+        if (waOnline && msg.paciente_telefone) {
+          try {
+            let texto;
+            if      (msg.tipo === 'confirmacao_consulta') texto = waSvc.textoConfirmacao(params);
+            else if (msg.tipo === 'aviso_preparacao')     texto = waSvc.textoAvisoPreparacao(params);
+            else if (msg.tipo === 'ficha_precadastro')    texto = waSvc.textoPrecadastro(params);
+            if (texto) await waSvc.enviarTexto(msg.paciente_telefone, texto);
+          } catch (waErr) {
+            console.error(`WhatsApp falhou (msg ${msg.id}):`, waErr.message);
+            // continua para tentar e-mail
+          }
+        }
+
+        // Envia e-mail se paciente tem e-mail
+        if (msg.paciente_email) {
+          if (msg.tipo === 'confirmacao_consulta') {
+            await emailSvc.enviarConfirmacaoConsulta({ email: msg.paciente_email, ...params });
+          } else if (msg.tipo === 'aviso_preparacao') {
+            await emailSvc.enviarAvisoPreparacao({ email: msg.paciente_email, ...params });
+          } else if (msg.tipo === 'ficha_precadastro') {
+            await emailSvc.enviarFichaPrecadastro({ email: msg.paciente_email, ...params });
+          }
+        }
+
+        // Pelo menos um canal disponível?
+        if (!msg.paciente_email && !msg.paciente_telefone) {
+          console.warn(`Mensagem ${msg.id}: paciente sem e-mail e sem telefone`);
         }
 
         await client.query(
