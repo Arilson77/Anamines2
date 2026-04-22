@@ -59,6 +59,46 @@ export type Usuario = {
   criado_em: string;
 };
 
+export type Especialidade = {
+  id: string;
+  nome: string;
+  cor: string;
+};
+
+export type Procedimento = {
+  id: string;
+  nome: string;
+  especialidade_id: string | null;
+  especialidade_nome: string | null;
+  duracao_minutos: number;
+  requer_preparacao: boolean;
+  instrucoes_preparacao: string | null;
+  antecedencia_aviso_horas: number;
+};
+
+export type Consulta = {
+  id: string;
+  paciente_id: string;
+  paciente_nome: string;
+  paciente_telefone: string;
+  profissional_id: string;
+  profissional_nome: string;
+  especialidade_id: string | null;
+  especialidade_nome: string | null;
+  especialidade_cor: string | null;
+  procedimento_id: string | null;
+  procedimento_nome: string | null;
+  data_hora: string;
+  duracao_minutos: number;
+  status: 'agendada' | 'confirmada' | 'cancelada' | 'realizada' | 'faltou';
+  requer_preparacao: boolean;
+  data_hora_preparacao: string | null;
+  observacoes: string | null;
+  confirmado_em: string | null;
+  precadastro_feito: boolean;
+  criado_em: string;
+};
+
 export type Ficha = {
   id: string;
   paciente_id: string;

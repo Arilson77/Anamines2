@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const ROTAS_PUBLICAS = ['/login', '/cadastro', '/consentimento', '/planos', '/esqueci-senha', '/redefinir-senha', '/aceitar-convite'];
+const ROTAS_PUBLICAS = ['/login', '/cadastro', '/consentimento', '/planos', '/esqueci-senha', '/redefinir-senha', '/aceitar-convite', '/confirmar-consulta', '/pre-cadastro'];
 
 function redirecionarLogin(req: NextRequest) {
   const url = req.nextUrl.clone();

@@ -3,12 +3,16 @@ import { usePathname, useRouter } from 'next/navigation';
 import { removerToken, obterUsuario } from '@/lib/auth';
 
 const LINKS_BASE = [
-  { href: '/',               label: 'Início',        icone: '⌂', apenasAdmin: false },
-  { href: '/pacientes',      label: 'Pacientes',     icone: '♡', apenasAdmin: false },
-  { href: '/fichas',         label: 'Fichas',        icone: '☰', apenasAdmin: false },
-  { href: '/configuracoes',  label: 'Configurações', icone: '⚙', apenasAdmin: false },
-  { href: '/configuracoes/usuarios', label: 'Equipe', icone: '👥', apenasAdmin: true },
-  { href: '/assinatura',     label: 'Assinatura',    icone: '★', apenasAdmin: true  },
+  { href: '/',                              label: 'Início',        icone: '⌂', apenasAdmin: false },
+  { href: '/agenda',                        label: 'Agenda',        icone: '📅', apenasAdmin: false },
+  { href: '/pacientes',                     label: 'Pacientes',     icone: '♡', apenasAdmin: false },
+  { href: '/fichas',                        label: 'Fichas',        icone: '☰', apenasAdmin: false },
+  { href: '/configuracoes',                 label: 'Configurações', icone: '⚙', apenasAdmin: false },
+  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade',icone: '🗓', apenasAdmin: false },
+  { href: '/configuracoes/especialidades',  label: 'Especialidades', icone: '🏥', apenasAdmin: true  },
+  { href: '/configuracoes/procedimentos',   label: 'Procedimentos',  icone: '🩺', apenasAdmin: true  },
+  { href: '/configuracoes/usuarios',        label: 'Equipe',         icone: '👥', apenasAdmin: true  },
+  { href: '/assinatura',                    label: 'Assinatura',    icone: '★', apenasAdmin: true  },
 ];
 
 export default function Sidebar() {
@@ -28,7 +32,7 @@ export default function Sidebar() {
     <aside className="w-56 min-h-screen bg-stone-900 text-stone-300 flex flex-col px-4 py-8">
       <div className="text-center mb-10">
         <span className="text-3xl text-stone-400">ψ</span>
-        <p className="text-xs tracking-widest uppercase text-stone-500 mt-1">Anamnese</p>
+        <p className="text-xs tracking-widest uppercase text-stone-500 mt-1">ANAMNE</p>
       </div>
 
       <nav className="flex-1 space-y-1">

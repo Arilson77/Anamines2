@@ -56,6 +56,70 @@ exports.enviarConvite = async (emailConvidado, nomeConsultorio, link) => {
   });
 };
 
+exports.enviarConfirmacaoConsulta = async ({ email, nomePaciente, nomeProfissional, nomeClinica, dataHora, requerPreparacao, dataPreparacao, linkConfirmar }) => {
+  const fmt   = d => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'full', timeStyle: 'short' });
+  const linhas = [
+    `Olá, ${nomePaciente}!`,
+    '',
+    `Sua consulta com ${nomeProfissional} em ${nomeClinica} está marcada para:`,
+    `📅 ${fmt(dataHora)}`,
+    '',
+    requerPreparacao && dataPreparacao
+      ? `⚠️  Este procedimento requer preparação. Após confirmar, você receberá as instruções.\n    Data de preparação: ${fmt(dataPreparacao)}`
+      : '',
+    'Confirme sua presença clicando no link:',
+    linkConfirmar,
+    '',
+    'Se não puder comparecer, entre em contato com a clínica.',
+  ].filter(l => l !== undefined);
+  await transporter.sendMail({
+    from: `"${nomeClinica}" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Confirme sua consulta — ${fmt(dataHora)}`,
+    text: linhas.join('\n'),
+  });
+};
+
+exports.enviarAvisoPreparacao = async ({ email, nomePaciente, nomeClinica, dataHora, dataPreparacao, instrucoes }) => {
+  const fmt = d => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'full', timeStyle: 'short' });
+  await transporter.sendMail({
+    from: `"${nomeClinica}" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: 'Instruções de preparação para sua consulta',
+    text: [
+      `Olá, ${nomePaciente}!`,
+      '',
+      `Sua consulta está marcada para ${fmt(dataHora)}.`,
+      dataPreparacao ? `A preparação deve ser iniciada em: ${fmt(dataPreparacao)}` : '',
+      '',
+      'Instruções de preparação:',
+      instrucoes || 'Entre em contato com a clínica para detalhes.',
+      '',
+      'Dúvidas? Entre em contato com a clínica.',
+    ].filter(Boolean).join('\n'),
+  });
+};
+
+exports.enviarFichaPrecadastro = async ({ email, nomePaciente, nomeClinica, dataHora, requerPreparacao, instrucoes, linkPrecadastro }) => {
+  const fmt = d => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'full', timeStyle: 'short' });
+  await transporter.sendMail({
+    from: `"${nomeClinica}" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Sua consulta está confirmada — ${fmt(dataHora)}`,
+    text: [
+      `Olá, ${nomePaciente}!`,
+      '',
+      `Sua consulta em ${nomeClinica} está confirmada para ${fmt(dataHora)}.`,
+      '',
+      requerPreparacao && instrucoes ? `Instruções de preparação:\n${instrucoes}\n` : '',
+      'Para agilizar seu atendimento, preencha sua ficha antecipadamente:',
+      linkPrecadastro,
+      '',
+      'O preenchimento é opcional mas agiliza o atendimento.',
+    ].filter(Boolean).join('\n'),
+  });
+};
+
 exports.enviarRedefinicaoSenha = async (email, nome, link) => {
   await transporter.sendMail({
     from:    `"Anamnese" <${process.env.SMTP_USER}>`,

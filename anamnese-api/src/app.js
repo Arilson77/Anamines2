@@ -7,14 +7,19 @@ if (process.env.SENTRY_DSN) {
   Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV || 'production' });
 }
 
-const authRoutes      = require('./routes/auth');
-const pacientesRoutes = require('./routes/pacientes');
-const fichasRoutes    = require('./routes/fichas');
-const publicoRoutes   = require('./routes/publico');
-const configRoutes    = require('./routes/configuracoes');
-const cobrancaRoutes  = require('./routes/cobranca');
-const usuariosRoutes  = require('./routes/usuarios');
-const erros           = require('./middleware/erros');
+const authRoutes          = require('./routes/auth');
+const pacientesRoutes     = require('./routes/pacientes');
+const fichasRoutes        = require('./routes/fichas');
+const publicoRoutes       = require('./routes/publico');
+const configRoutes        = require('./routes/configuracoes');
+const cobrancaRoutes      = require('./routes/cobranca');
+const usuariosRoutes      = require('./routes/usuarios');
+const especialidadesRoutes   = require('./routes/especialidades');
+const procedimentosRoutes    = require('./routes/procedimentos');
+const consultasRoutes        = require('./routes/consultas');
+const disponibilidadeRoutes  = require('./routes/disponibilidade');
+const erros               = require('./middleware/erros');
+const scheduler           = require('./services/scheduler');
 
 const app = express();
 
@@ -39,13 +44,19 @@ app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use('/cobranca/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
-app.use('/auth',          authRoutes);
-app.use('/pacientes',     pacientesRoutes);
-app.use('/fichas',        fichasRoutes);
-app.use('/publico',       publicoRoutes);
-app.use('/configuracoes', configRoutes);
-app.use('/cobranca',      cobrancaRoutes);
-app.use('/usuarios',      usuariosRoutes);
+app.use('/auth',           authRoutes);
+app.use('/pacientes',      pacientesRoutes);
+app.use('/fichas',         fichasRoutes);
+app.use('/publico',        publicoRoutes);
+app.use('/configuracoes',  configRoutes);
+app.use('/cobranca',       cobrancaRoutes);
+app.use('/usuarios',       usuariosRoutes);
+app.use('/especialidades',  especialidadesRoutes);
+app.use('/procedimentos',   procedimentosRoutes);
+app.use('/consultas',       consultasRoutes);
+app.use('/disponibilidade', disponibilidadeRoutes);
+
+scheduler.iniciar();
 
 app.get('/health', (req, res) => res.json({
   ok: true,

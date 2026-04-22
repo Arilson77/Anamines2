@@ -169,10 +169,151 @@ DO $$ BEGIN
 END $$;
 
 -- =============================================
+-- 8. ESPECIALIDADES
+-- =============================================
+CREATE TABLE IF NOT EXISTS especialidades (
+  id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  nome      TEXT NOT NULL,
+  cor       TEXT NOT NULL DEFAULT '#6b7280',
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- =============================================
+-- 9. PROCEDIMENTOS
+-- =============================================
+CREATE TABLE IF NOT EXISTS procedimentos (
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id                UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  especialidade_id         UUID REFERENCES especialidades(id) ON DELETE SET NULL,
+  nome                     TEXT NOT NULL,
+  duracao_minutos          INT NOT NULL DEFAULT 50,
+  requer_preparacao        BOOLEAN NOT NULL DEFAULT false,
+  instrucoes_preparacao    TEXT,
+  antecedencia_aviso_horas INT NOT NULL DEFAULT 48,
+  criado_em                TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- =============================================
+-- 10. CONSULTAS (agenda)
+-- =============================================
+CREATE TABLE IF NOT EXISTS consultas (
+  id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id            UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  paciente_id          UUID NOT NULL REFERENCES pacientes(id) ON DELETE CASCADE,
+  profissional_id      UUID NOT NULL REFERENCES usuarios(id),
+  especialidade_id     UUID REFERENCES especialidades(id) ON DELETE SET NULL,
+  procedimento_id      UUID REFERENCES procedimentos(id) ON DELETE SET NULL,
+  data_hora            TIMESTAMPTZ NOT NULL,
+  duracao_minutos      INT NOT NULL DEFAULT 50,
+  status               TEXT NOT NULL DEFAULT 'agendada',
+  requer_preparacao    BOOLEAN NOT NULL DEFAULT false,
+  data_hora_preparacao TIMESTAMPTZ,
+  observacoes          TEXT,
+  confirmacao_enviada  BOOLEAN NOT NULL DEFAULT false,
+  preparacao_enviada   BOOLEAN NOT NULL DEFAULT false,
+  confirmado_em        TIMESTAMPTZ,
+  token_precadastro    TEXT UNIQUE DEFAULT encode(gen_random_bytes(24), 'hex'),
+  precadastro_feito    BOOLEAN NOT NULL DEFAULT false,
+  criado_em            TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- =============================================
+-- 11. FILA DE MENSAGENS AUTOMÁTICAS
+-- =============================================
+CREATE TABLE IF NOT EXISTS mensagens_fila (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id   UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  consulta_id UUID NOT NULL REFERENCES consultas(id) ON DELETE CASCADE,
+  tipo        TEXT NOT NULL,
+  canal       TEXT NOT NULL DEFAULT 'email',
+  enviar_em   TIMESTAMPTZ NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'pendente',
+  tentativas  INT NOT NULL DEFAULT 0,
+  enviada_em  TIMESTAMPTZ,
+  criado_em   TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS especialidade_id       UUID REFERENCES especialidades(id) ON DELETE SET NULL;
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS duracao_padrao_minutos INT NOT NULL DEFAULT 50;
+
+-- =============================================
+-- 12. DISPONIBILIDADE SEMANAL DOS PROFISSIONAIS
+-- =============================================
+CREATE TABLE IF NOT EXISTS disponibilidades (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  profissional_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  dia_semana      INT  NOT NULL CHECK (dia_semana BETWEEN 0 AND 6), -- 0=dom,1=seg,...,6=sab
+  hora_inicio     TIME NOT NULL,
+  hora_fim        TIME NOT NULL,
+  ativo           BOOLEAN NOT NULL DEFAULT true,
+  criado_em       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (profissional_id, dia_semana, hora_inicio)
+);
+
+-- =============================================
+-- 13. BLOQUEIOS (férias, folgas, ausências)
+-- =============================================
+CREATE TABLE IF NOT EXISTS bloqueios (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  profissional_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  data_inicio     DATE NOT NULL,
+  data_fim        DATE NOT NULL,
+  motivo          TEXT,
+  criado_em       TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE disponibilidades ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bloqueios        ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='disponibilidades' AND policyname='tenant_disponibilidades') THEN
+    CREATE POLICY tenant_disponibilidades ON disponibilidades USING (tenant_id = current_setting('app.tenant_id',true)::UUID);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='bloqueios' AND policyname='tenant_bloqueios') THEN
+    CREATE POLICY tenant_bloqueios ON bloqueios USING (tenant_id = current_setting('app.tenant_id',true)::UUID);
+  END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS idx_disponib_profissional ON disponibilidades(profissional_id);
+CREATE INDEX IF NOT EXISTS idx_bloqueios_profissional ON bloqueios(profissional_id);
+CREATE INDEX IF NOT EXISTS idx_bloqueios_datas        ON bloqueios(data_inicio, data_fim);
+
+ALTER TABLE especialidades ENABLE ROW LEVEL SECURITY;
+ALTER TABLE procedimentos  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consultas      ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='especialidades' AND policyname='tenant_especialidades') THEN
+    CREATE POLICY tenant_especialidades ON especialidades USING (tenant_id = current_setting('app.tenant_id',true)::UUID);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='procedimentos' AND policyname='tenant_procedimentos') THEN
+    CREATE POLICY tenant_procedimentos ON procedimentos USING (tenant_id = current_setting('app.tenant_id',true)::UUID);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='consultas' AND policyname='tenant_consultas') THEN
+    CREATE POLICY tenant_consultas ON consultas USING (
+      tenant_id = current_setting('app.tenant_id',true)::UUID AND (
+        profissional_id = current_setting('app.usuario_id',true)::UUID OR
+        current_setting('app.papel',true) IN ('admin','recepcionista')
+      )
+    );
+  END IF;
+END $$;
+
+-- =============================================
 -- ÍNDICES DE PERFORMANCE
 -- =============================================
 CREATE INDEX IF NOT EXISTS idx_pacientes_tenant ON pacientes(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_fichas_tenant    ON fichas_anamnese(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_fichas_paciente  ON fichas_anamnese(paciente_id);
 CREATE INDEX IF NOT EXISTS idx_logs_tenant      ON logs_acesso(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_fichas_dados     ON fichas_anamnese USING GIN(dados);
+CREATE INDEX IF NOT EXISTS idx_fichas_dados          ON fichas_anamnese USING GIN(dados);
+CREATE INDEX IF NOT EXISTS idx_especialidades_tenant  ON especialidades(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_procedimentos_tenant   ON procedimentos(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_consultas_tenant       ON consultas(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_consultas_profissional ON consultas(profissional_id);
+CREATE INDEX IF NOT EXISTS idx_consultas_paciente     ON consultas(paciente_id);
+CREATE INDEX IF NOT EXISTS idx_consultas_data_hora    ON consultas(data_hora);
+CREATE INDEX IF NOT EXISTS idx_mensagens_fila_status  ON mensagens_fila(status, enviar_em);
