@@ -2,18 +2,21 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { removerToken, obterUsuario } from '@/lib/auth';
 
-const LINKS_BASE = [
-  { href: '/',                              label: 'Início',        icone: '⌂', apenasAdmin: false },
-  { href: '/agenda',                        label: 'Agenda',        icone: '📅', apenasAdmin: false },
-  { href: '/pacientes',                     label: 'Pacientes',     icone: '♡', apenasAdmin: false },
-  { href: '/fichas',                        label: 'Fichas',        icone: '☰', apenasAdmin: false },
-  { href: '/configuracoes',                 label: 'Configurações', icone: '⚙', apenasAdmin: false },
-  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade',icone: '🗓', apenasAdmin: false },
-  { href: '/configuracoes/especialidades',  label: 'Especialidades', icone: '🏥', apenasAdmin: true  },
-  { href: '/configuracoes/procedimentos',   label: 'Procedimentos',  icone: '🩺', apenasAdmin: true  },
-  { href: '/configuracoes/whatsapp',        label: 'WhatsApp',       icone: '💬', apenasAdmin: true  },
-  { href: '/configuracoes/usuarios',        label: 'Equipe',         icone: '👥', apenasAdmin: true  },
-  { href: '/assinatura',                    label: 'Assinatura',    icone: '★', apenasAdmin: true  },
+const LINKS_PRINCIPAIS = [
+  { href: '/',          label: 'Início',    icone: '⌂' },
+  { href: '/agenda',    label: 'Agenda',    icone: '📅' },
+  { href: '/pacientes', label: 'Pacientes', icone: '♡' },
+  { href: '/fichas',    label: 'Fichas',    icone: '☰' },
+];
+
+const LINKS_CONFIG = [
+  { href: '/configuracoes',                 label: 'Geral',           icone: '⚙',  apenasAdmin: false },
+  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade', icone: '🗓', apenasAdmin: false },
+  { href: '/configuracoes/especialidades',  label: 'Especialidades',  icone: '🏥', apenasAdmin: true  },
+  { href: '/configuracoes/procedimentos',   label: 'Procedimentos',   icone: '🩺', apenasAdmin: true  },
+  { href: '/configuracoes/whatsapp',        label: 'WhatsApp',        icone: '💬', apenasAdmin: true  },
+  { href: '/configuracoes/usuarios',        label: 'Equipe',          icone: '👥', apenasAdmin: true  },
+  { href: '/assinatura',                    label: 'Assinatura',      icone: '★',  apenasAdmin: true  },
 ];
 
 export default function Sidebar() {
@@ -21,13 +24,21 @@ export default function Sidebar() {
   const router   = useRouter();
   const usuario  = obterUsuario();
   const isAdmin  = usuario?.papel === 'admin';
-  const LINKS    = LINKS_BASE.filter(l => !l.apenasAdmin || isAdmin);
 
   function sair() {
     removerToken();
     document.cookie = 'anamnese_token=; path=/; max-age=0';
     router.push('/login');
   }
+
+  function linkClass(href: string) {
+    const ativo = pathname === href || (href !== '/' && pathname.startsWith(href));
+    return `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition ${
+      ativo ? 'bg-stone-700 text-white' : 'hover:bg-stone-800 text-stone-400'
+    }`;
+  }
+
+  const configLinks = LINKS_CONFIG.filter(l => !l.apenasAdmin || isAdmin);
 
   return (
     <aside className="w-56 min-h-screen bg-stone-900 text-stone-300 flex flex-col px-4 py-8">
@@ -37,20 +48,23 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1">
-        {LINKS.map(link => {
-          const ativo = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
-          return (
-            <a key={link.href} href={link.href}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition ${
-                ativo
-                  ? 'bg-stone-700 text-white'
-                  : 'hover:bg-stone-800 text-stone-400'
-              }`}>
-              <span>{link.icone}</span>
-              {link.label}
-            </a>
-          );
-        })}
+        {LINKS_PRINCIPAIS.map(link => (
+          <a key={link.href} href={link.href} className={linkClass(link.href)}>
+            <span>{link.icone}</span>
+            {link.label}
+          </a>
+        ))}
+
+        <div className="pt-4 pb-1">
+          <p className="text-xs uppercase tracking-widest text-stone-600 px-4">Configurações</p>
+        </div>
+
+        {configLinks.map(link => (
+          <a key={link.href} href={link.href} className={linkClass(link.href)}>
+            <span>{link.icone}</span>
+            {link.label}
+          </a>
+        ))}
       </nav>
 
       <button onClick={sair}
