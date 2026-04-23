@@ -3,20 +3,20 @@ import { usePathname, useRouter } from 'next/navigation';
 import { removerToken, obterUsuario } from '@/lib/auth';
 
 const LINKS_PRINCIPAIS = [
-  { href: '/',          label: 'Início',    icone: '⌂' },
-  { href: '/agenda',    label: 'Agenda',    icone: '📅' },
-  { href: '/pacientes', label: 'Pacientes', icone: '♡' },
-  { href: '/fichas',    label: 'Fichas',    icone: '☰' },
+  { href: '/',                              label: 'Início',          icone: '⌂' },
+  { href: '/agenda',                        label: 'Agenda',          icone: '📅' },
+  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade', icone: '🗓' },
+  { href: '/pacientes',                     label: 'Pacientes',       icone: '♡' },
+  { href: '/fichas',                        label: 'Fichas',          icone: '☰' },
 ];
 
 const LINKS_CONFIG = [
-  { href: '/configuracoes',                 label: 'Geral',           icone: '⚙',  apenasAdmin: false },
-  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade', icone: '🗓', apenasAdmin: false },
-  { href: '/configuracoes/especialidades',  label: 'Especialidades',  icone: '🏥', apenasAdmin: true  },
-  { href: '/configuracoes/procedimentos',   label: 'Procedimentos',   icone: '🩺', apenasAdmin: true  },
-  { href: '/configuracoes/whatsapp',        label: 'WhatsApp',        icone: '💬', apenasAdmin: true  },
-  { href: '/configuracoes/usuarios',        label: 'Equipe',          icone: '👥', apenasAdmin: true  },
-  { href: '/assinatura',                    label: 'Assinatura',      icone: '★',  apenasAdmin: true  },
+  { href: '/configuracoes',                label: 'Perfil / Clínica', icone: '⚙',  apenasAdmin: false },
+  { href: '/configuracoes/especialidades', label: 'Especialidades',   icone: '🏥', apenasAdmin: true  },
+  { href: '/configuracoes/procedimentos',  label: 'Procedimentos',    icone: '🩺', apenasAdmin: true  },
+  { href: '/configuracoes/whatsapp',       label: 'WhatsApp',         icone: '💬', apenasAdmin: true  },
+  { href: '/configuracoes/usuarios',       label: 'Equipe',           icone: '👥', apenasAdmin: true  },
+  { href: '/assinatura',                   label: 'Assinatura',       icone: '★',  apenasAdmin: true  },
 ];
 
 export default function Sidebar() {
