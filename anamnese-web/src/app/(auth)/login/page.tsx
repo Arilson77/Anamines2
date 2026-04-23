@@ -21,7 +21,6 @@ function LoginForm() {
     try {
       const { token } = await api.post<{ token: string; nome: string }>('/auth/login', { email, senha });
       salvarToken(token);
-      document.cookie = `anamnese_token=${token}; path=/; max-age=28800; SameSite=Strict`;
       router.push(params.get('redirect') || '/');
     } catch (err: unknown) {
       setErro(err instanceof Error ? err.message : 'Erro ao fazer login');

@@ -3,6 +3,7 @@ import { obterToken, removerToken } from './auth';
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (!BASE) throw new Error('API não configurada. Contate o suporte.');
   const token = obterToken();
 
   const res = await fetch(`${BASE}${path}`, {

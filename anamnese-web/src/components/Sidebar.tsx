@@ -27,7 +27,6 @@ export default function Sidebar() {
 
   function sair() {
     removerToken();
-    document.cookie = 'anamnese_token=; path=/; max-age=0';
     router.push('/login');
   }
 
