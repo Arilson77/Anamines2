@@ -55,8 +55,8 @@ exports.enviarTexto = async (telefone, texto) => {
   if (!configurado()) throw new Error('Evolution API não configurada');
   const numero = formatarNumero(telefone);
   return chamar('POST', `/message/sendText/${INST()}`, {
-    number: numero,
-    text:   texto,
+    number:      numero,
+    textMessage: { text: texto },
   });
 };
 
