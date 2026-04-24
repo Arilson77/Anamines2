@@ -102,7 +102,7 @@ export default function AgendaPage() {
         </div>
 
         {/* Grade de horas */}
-        <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: '600px', paddingTop: '12px' }}>
           <div className="relative grid" style={{ gridTemplateColumns: '56px repeat(6, 1fr)', height: `${totalPx}px` }}>
             {/* Linhas de hora */}
             {horas.map(h => (
@@ -157,7 +157,7 @@ export default function AgendaPage() {
 
     return (
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-y-auto" style={{ maxHeight: '640px' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: '640px', paddingTop: '12px' }}>
           <div className="relative flex" style={{ height: `${totalPx}px` }}>
             {/* Horas */}
             <div className="w-14 flex-shrink-0 border-r border-gray-100 relative">
