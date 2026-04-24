@@ -41,7 +41,10 @@ exports.status = async () => {
 
 exports.qrcode = async () => {
   const data = await chamar('GET', `/instance/connect/${INST()}`);
-  return data; // { base64, code }
+  if (data?.base64?.startsWith('data:')) {
+    data.base64 = data.base64.split(',')[1];
+  }
+  return data;
 };
 
 exports.desconectar = async () => {
