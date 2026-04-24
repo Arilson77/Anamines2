@@ -45,6 +45,7 @@ app.use(cors({ origin: allowedOrigin, credentials: true }));
 
 app.use('/cobranca/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
+app.use((req, res, next) => { res.setHeader('Content-Type', 'application/json; charset=utf-8'); next(); });
 
 app.use('/auth',           authRoutes);
 app.use('/pacientes',      pacientesRoutes);

@@ -38,6 +38,7 @@ async function migrate() {
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    options: '-c client_encoding=UTF8',
   });
 
   const sql        = fs.readFileSync(path.join(__dirname, '..', 'schema.sql'), 'utf8');
