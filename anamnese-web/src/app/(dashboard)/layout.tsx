@@ -18,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const inadimplente     = plano?.status === 'inadimplente';
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
+    <div className="flex min-h-screen bg-stone-50/60">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-auto">
         {expirado && (

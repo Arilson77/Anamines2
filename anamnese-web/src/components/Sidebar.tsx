@@ -32,44 +32,59 @@ export default function Sidebar() {
 
   function linkClass(href: string) {
     const ativo = pathname === href || (href !== '/' && pathname.startsWith(href));
-    return `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition ${
-      ativo ? 'bg-stone-700 text-white' : 'hover:bg-stone-800 text-stone-400'
+    return `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+      ativo
+        ? 'bg-teal-50 text-teal-700 border border-teal-200'
+        : 'text-stone-500 hover:bg-stone-100 hover:text-stone-700'
     }`;
   }
 
   const configLinks = LINKS_CONFIG.filter(l => !l.apenasAdmin || isAdmin);
 
   return (
-    <aside className="w-56 min-h-screen bg-stone-900 text-stone-300 flex flex-col px-4 py-8">
-      <div className="text-center mb-10">
-        <span className="text-3xl text-stone-400">ψ</span>
-        <p className="text-xs tracking-widest uppercase text-stone-500 mt-1">ANAMNE</p>
+    <aside className="w-56 min-h-screen bg-white border-r border-stone-200 flex flex-col px-3 py-6">
+      <div className="px-3 mb-8">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl text-teal-600">ψ</span>
+          <div>
+            <p className="text-sm font-semibold text-stone-800 leading-none">Anamne</p>
+            <p className="text-xs text-stone-400 tracking-wide">Clínica Digital</p>
+          </div>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 space-y-0.5">
         {LINKS_PRINCIPAIS.map(link => (
           <a key={link.href} href={link.href} className={linkClass(link.href)}>
-            <span>{link.icone}</span>
+            <span className="text-base w-5 text-center">{link.icone}</span>
             {link.label}
           </a>
         ))}
 
-        <div className="pt-4 pb-1">
-          <p className="text-xs uppercase tracking-widest text-stone-600 px-4">Configurações</p>
+        <div className="pt-5 pb-1.5 px-3">
+          <p className="text-xs uppercase tracking-widest text-stone-400 font-semibold">Configurações</p>
         </div>
 
         {configLinks.map(link => (
           <a key={link.href} href={link.href} className={linkClass(link.href)}>
-            <span>{link.icone}</span>
+            <span className="text-base w-5 text-center">{link.icone}</span>
             {link.label}
           </a>
         ))}
       </nav>
 
-      <button onClick={sair}
-        className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-stone-500 hover:bg-stone-800 hover:text-stone-300 transition mt-4">
-        <span>→</span> Sair
-      </button>
+      <div className="border-t border-stone-100 pt-3 mt-3">
+        {usuario && (
+          <div className="px-3 py-2 mb-1">
+            <p className="text-xs font-medium text-stone-700 truncate">{usuario.nome}</p>
+            <p className="text-xs text-stone-400 capitalize">{usuario.papel}</p>
+          </div>
+        )}
+        <button onClick={sair}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-400 hover:bg-red-50 hover:text-red-500 transition-all">
+          <span className="w-5 text-center">→</span> Sair
+        </button>
+      </div>
     </aside>
   );
 }
