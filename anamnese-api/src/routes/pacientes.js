@@ -8,6 +8,7 @@ router.use(verificarPlano);
 
 router.get('/',                      ctrl.listar);
 router.get('/:id',                   ctrl.buscar);
+router.get('/:id/prontuario',          ctrl.prontuario);
 router.get('/:id/link-consentimento', ctrl.gerarLinkConsentimento);
 router.post('/',                     ctrl.criar);
 router.put('/:id',                   ctrl.atualizar);

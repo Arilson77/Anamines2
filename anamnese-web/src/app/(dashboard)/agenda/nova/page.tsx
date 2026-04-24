@@ -32,6 +32,9 @@ export default function NovaConsultaPage() {
   const [slotSelecionado, setSlotSelecionado] = useState('');
   const [buscandoSlots,   setBuscandoSlots]   = useState(false);
 
+  const [recorrencia,    setRecorrencia]    = useState('');
+  const [recorrenciaFim, setRecorrenciaFim] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [erro,    setErro]    = useState('');
 
@@ -94,6 +97,8 @@ export default function NovaConsultaPage() {
         requer_preparacao:    requerPrep,
         data_hora_preparacao: requerPrep && dataPrep ? new Date(dataPrep).toISOString() : undefined,
         observacoes:          observacoes || undefined,
+        recorrencia:          recorrencia || undefined,
+        recorrencia_fim:      recorrencia && recorrenciaFim ? new Date(recorrenciaFim).toISOString() : undefined,
       });
       router.push('/agenda');
     } catch (err: unknown) {
@@ -230,6 +235,42 @@ export default function NovaConsultaPage() {
             <p className="text-xs text-stone-400 mt-1">O paciente receberá lembrete 24h antes desta data.</p>
           </div>
         )}
+
+        {/* Recorrência */}
+        <div className="border border-stone-200 rounded-lg p-4 bg-stone-50 space-y-3">
+          <div className="flex items-center gap-3">
+            <label className="text-xs font-medium text-stone-500 uppercase tracking-wide">Repetir consulta</label>
+            <select value={recorrencia} onChange={e => { setRecorrencia(e.target.value); setRecorrenciaFim(''); }}
+              className="border border-stone-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-stone-300">
+              <option value="">Não repetir</option>
+              <option value="semanal">Semanalmente</option>
+              <option value="quinzenal">Quinzenalmente</option>
+              <option value="mensal">Mensalmente</option>
+            </select>
+          </div>
+          {recorrencia && (
+            <div>
+              <label className="block text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">Repetir até *</label>
+              <input type="date" value={recorrenciaFim} min={dataSelecionada || hoje}
+                onChange={e => setRecorrenciaFim(e.target.value)}
+                className="w-full border border-stone-200 rounded-lg px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-stone-300" />
+              {recorrencia && recorrenciaFim && dataSelecionada && (
+                <p className="text-xs text-teal-600 mt-1">
+                  {(() => {
+                    let n = 0; let d = new Date(`${dataSelecionada}T00:00:00`); const fim = new Date(recorrenciaFim);
+                    while (true) {
+                      if (recorrencia === 'semanal') d = new Date(d.getTime() + 7*86400000);
+                      else if (recorrencia === 'quinzenal') d = new Date(d.getTime() + 14*86400000);
+                      else { d = new Date(d); d.setMonth(d.getMonth()+1); }
+                      if (d > fim) break; n++;
+                    }
+                    return `+ ${n} ocorrência${n !== 1 ? 's' : ''} além desta`;
+                  })()}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Observações */}
         <div>

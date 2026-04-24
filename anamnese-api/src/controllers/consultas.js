@@ -18,6 +18,7 @@ exports.listar = async (req, res, next) => {
     if (inicio)          { q += ` AND c.data_hora >= $${i++}`; params.push(inicio); }
     if (fim)             { q += ` AND c.data_hora <= $${i++}`; params.push(fim); }
     if (profissional_id) { q += ` AND c.profissional_id = $${i++}`; params.push(profissional_id); }
+    if (req.query.paciente_id) { q += ` AND c.paciente_id = $${i++}`; params.push(req.query.paciente_id); }
     q += ' ORDER BY c.data_hora ASC';
     const { rows } = await req.dbClient.query(q, params);
     res.json(rows);
@@ -44,10 +45,30 @@ exports.buscar = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+// Gera datas de recorrência a partir de data_hora até recorrencia_fim
+function gerarDatas(data_hora, recorrencia, recorrencia_fim) {
+  const datas = [];
+  const fim = new Date(recorrencia_fim);
+  let atual = new Date(data_hora);
+  // pula a primeira (já será criada como consulta principal)
+  while (true) {
+    if (recorrencia === 'semanal')    atual = new Date(atual.getTime() + 7 * 86400000);
+    else if (recorrencia === 'quinzenal') atual = new Date(atual.getTime() + 14 * 86400000);
+    else if (recorrencia === 'mensal') {
+      atual = new Date(atual);
+      atual.setMonth(atual.getMonth() + 1);
+    }
+    if (atual > fim) break;
+    datas.push(new Date(atual));
+  }
+  return datas;
+}
+
 exports.criar = async (req, res, next) => {
   const {
     paciente_id, profissional_id, especialidade_id, procedimento_id,
     data_hora, duracao_minutos, requer_preparacao, data_hora_preparacao, observacoes,
+    recorrencia, recorrencia_fim,
   } = req.body;
   const client = req.dbClient;
   try {
@@ -98,11 +119,51 @@ exports.criar = async (req, res, next) => {
       });
     }
 
+    // Lembrete 2h antes (sempre, se consulta for no futuro)
+    const lembrete2h = new Date(dataHora.getTime() - 2 * 3600000);
+    if (lembrete2h > new Date()) {
+      mensagens.push({ tipo: 'lembrete_2h', enviar_em: lembrete2h });
+    }
+
     for (const { tipo, enviar_em } of mensagens) {
       await client.query(
         'INSERT INTO mensagens_fila (tenant_id, consulta_id, tipo, canal, enviar_em) VALUES ($1,$2,$3,$4,$5)',
         [req.usuario.tenant_id, consulta.id, tipo, 'email', enviar_em]
       );
+    }
+
+    // Cria ocorrências recorrentes se solicitado
+    if (recorrencia && recorrencia_fim) {
+      const datasExtra = gerarDatas(data_hora, recorrencia, recorrencia_fim);
+      for (const dt of datasExtra) {
+        const { rows: [c] } = await client.query(`
+          INSERT INTO consultas
+            (tenant_id, paciente_id, profissional_id, especialidade_id, procedimento_id,
+             data_hora, duracao_minutos, requer_preparacao, data_hora_preparacao, observacoes)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id
+        `, [
+          req.usuario.tenant_id, paciente_id,
+          profissional_id || req.usuario.usuario_id,
+          especialidade_id || null, procedimento_id || null,
+          dt.toISOString(), duracao_minutos || 50,
+          requer_preparacao || false, data_hora_preparacao || null, observacoes || null,
+        ]);
+        // Lembrete 2h para cada ocorrência
+        const l2h = new Date(dt.getTime() - 2 * 3600000);
+        if (l2h > new Date()) {
+          await client.query(
+            'INSERT INTO mensagens_fila (tenant_id, consulta_id, tipo, canal, enviar_em) VALUES ($1,$2,$3,$4,$5)',
+            [req.usuario.tenant_id, c.id, 'lembrete_2h', 'email', l2h]
+          );
+        }
+        const conf = new Date(dt.getTime() - 24 * 3600000);
+        if (conf > new Date()) {
+          await client.query(
+            'INSERT INTO mensagens_fila (tenant_id, consulta_id, tipo, canal, enviar_em) VALUES ($1,$2,$3,$4,$5)',
+            [req.usuario.tenant_id, c.id, 'confirmacao_consulta', 'email', conf]
+          );
+        }
+      }
     }
 
     res.status(201).json(consulta);

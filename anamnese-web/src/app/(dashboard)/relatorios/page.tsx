@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { obterToken } from '@/lib/auth';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
@@ -45,8 +46,24 @@ function Card({ label, valor, sub, cor }: { label: string; valor: number | strin
 }
 
 export default function RelatoriosPage() {
-  const [dados,   setDados]   = useState<Resumo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dados,        setDados]        = useState<Resumo | null>(null);
+  const [loading,      setLoading]      = useState(true);
+  const [exportando,   setExportando]   = useState(false);
+
+  async function exportarPDF() {
+    setExportando(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token  = obterToken();
+      const res    = await fetch(`${apiUrl}/relatorios/pdf`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error('Erro ao gerar PDF');
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = `relatorio-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click(); URL.revokeObjectURL(url);
+    } catch { /* silent */ } finally { setExportando(false); }
+  }
 
   useEffect(() => {
     api.get<Resumo>('/relatorios/resumo').then(setDados).catch(() => null).finally(() => setLoading(false));
@@ -63,6 +80,13 @@ export default function RelatoriosPage() {
 
   return (
     <div className="space-y-6">
+      {/* Botão exportar */}
+      <div className="flex justify-end">
+        <button onClick={exportarPDF} disabled={exportando}
+          className="bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white rounded-lg px-4 py-2 text-sm font-medium transition flex items-center gap-2">
+          {exportando ? 'Gerando PDF…' : '↓ Exportar PDF'}
+        </button>
+      </div>
       {/* Cards de totais */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card label="Total de Pacientes"   valor={totais.total_pacientes} cor="text-teal-600"   sub="cadastrados" />

@@ -314,3 +314,9 @@ CREATE INDEX IF NOT EXISTS idx_consultas_profissional ON consultas(profissional_
 CREATE INDEX IF NOT EXISTS idx_consultas_paciente     ON consultas(paciente_id);
 CREATE INDEX IF NOT EXISTS idx_consultas_data_hora    ON consultas(data_hora);
 CREATE INDEX IF NOT EXISTS idx_mensagens_fila_status  ON mensagens_fila(status, enviar_em);
+-- Índices compostos para queries com múltiplos filtros
+CREATE INDEX IF NOT EXISTS idx_consultas_tenant_data         ON consultas(tenant_id, data_hora);
+CREATE INDEX IF NOT EXISTS idx_consultas_tenant_prof_data    ON consultas(tenant_id, profissional_id, data_hora);
+CREATE INDEX IF NOT EXISTS idx_consultas_tenant_pac          ON consultas(tenant_id, paciente_id);
+CREATE INDEX IF NOT EXISTS idx_fichas_tenant_criado          ON fichas_anamnese(tenant_id, criado_em DESC);
+CREATE INDEX IF NOT EXISTS idx_mensagens_pendentes           ON mensagens_fila(status, enviar_em) WHERE status = 'pendente';

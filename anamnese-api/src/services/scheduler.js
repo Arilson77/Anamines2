@@ -51,6 +51,7 @@ async function processarMensagens() {
             if      (msg.tipo === 'confirmacao_consulta') texto = waSvc.textoConfirmacao(params);
             else if (msg.tipo === 'aviso_preparacao')     texto = waSvc.textoAvisoPreparacao(params);
             else if (msg.tipo === 'ficha_precadastro')    texto = waSvc.textoPrecadastro(params);
+            else if (msg.tipo === 'lembrete_2h')          texto = waSvc.textoLembrete2h(params);
             if (texto) await waSvc.enviarTexto(msg.paciente_telefone, texto);
           } catch (waErr) {
             console.error(`WhatsApp falhou (msg ${msg.id}):`, waErr.message);
@@ -66,6 +67,8 @@ async function processarMensagens() {
             await emailSvc.enviarAvisoPreparacao({ email: msg.paciente_email, ...params });
           } else if (msg.tipo === 'ficha_precadastro') {
             await emailSvc.enviarFichaPrecadastro({ email: msg.paciente_email, ...params });
+          } else if (msg.tipo === 'lembrete_2h') {
+            await emailSvc.enviarLembrete2h({ email: msg.paciente_email, ...params });
           }
         }
 

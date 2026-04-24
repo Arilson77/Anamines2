@@ -120,6 +120,23 @@ exports.enviarFichaPrecadastro = async ({ email, nomePaciente, nomeClinica, data
   });
 };
 
+exports.enviarLembrete2h = async ({ email, nomePaciente, nomeProfissional, nomeClinica, dataHora }) => {
+  const fmt = d => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'full', timeStyle: 'short' });
+  await transporter.sendMail({
+    from: `"${nomeClinica}" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Lembrete: sua consulta começa em 2 horas`,
+    text: [
+      `Olá, ${nomePaciente}!`,
+      '',
+      `Este é um lembrete de que sua consulta com ${nomeProfissional} em ${nomeClinica} começa em aproximadamente 2 horas.`,
+      `📅 ${fmt(dataHora)}`,
+      '',
+      'Boa consulta!',
+    ].join('\n'),
+  });
+};
+
 exports.enviarRedefinicaoSenha = async (email, nome, link) => {
   await transporter.sendMail({
     from:    `"Anamnese" <${process.env.SMTP_USER}>`,

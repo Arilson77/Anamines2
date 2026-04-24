@@ -1,0 +1,7 @@
+.env
+.env.*
+tmp_env.json
+.vercel/
+.vscode/
+.claude/
+node_modules/

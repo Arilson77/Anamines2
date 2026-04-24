@@ -96,6 +96,18 @@ exports.textoAvisoPreparacao = ({ nomePaciente, nomeClinica, dataHora, dataPrepa
   ].filter(l => l !== undefined).join('\n');
 };
 
+exports.textoLembrete2h = ({ nomePaciente, nomeProfissional, nomeClinica, dataHora }) => {
+  const fmt = d => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return [
+    `⏰ *Lembrete de consulta!*`,
+    '',
+    `Olá, *${nomePaciente}*! Sua consulta com *${nomeProfissional}* em *${nomeClinica}* começa em aproximadamente *2 horas*:`,
+    `📅 ${fmt(dataHora)}`,
+    '',
+    '_Até logo!_',
+  ].join('\n');
+};
+
 exports.textoPrecadastro = ({ nomePaciente, nomeClinica, dataHora, requerPreparacao, instrucoes, linkPrecadastro }) => {
   const fmt = d => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
   return [

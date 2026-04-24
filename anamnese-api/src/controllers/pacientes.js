@@ -61,6 +61,39 @@ exports.remover = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+// GET /pacientes/:id/prontuario
+exports.prontuario = async (req, res, next) => {
+  const client = req.dbClient;
+  try {
+    const [pacRes, consultasRes, fichasRes] = await Promise.all([
+      client.query('SELECT * FROM pacientes WHERE id = $1', [req.params.id]),
+      client.query(`
+        SELECT c.id, c.data_hora, c.duracao_minutos, c.status, c.observacoes,
+          u.nome AS profissional_nome,
+          e.nome AS especialidade_nome, e.cor AS especialidade_cor,
+          pr.nome AS procedimento_nome
+        FROM consultas c
+        JOIN usuarios u ON u.id = c.profissional_id
+        LEFT JOIN especialidades e ON e.id = c.especialidade_id
+        LEFT JOIN procedimentos pr ON pr.id = c.procedimento_id
+        WHERE c.paciente_id = $1
+        ORDER BY c.data_hora DESC
+      `, [req.params.id]),
+      client.query(`
+        SELECT id, criado_em, atualizado_em,
+          u.nome AS profissional_nome
+        FROM fichas_anamnese f
+        JOIN usuarios u ON u.id = f.profissional_id
+        WHERE f.paciente_id = $1
+        ORDER BY f.criado_em DESC
+      `, [req.params.id]),
+    ]);
+    if (!pacRes.rows.length) return res.status(404).json({ erro: 'Paciente não encontrado' });
+    await lgpdService.log(client, req.usuario, 'visualizou_prontuario', `paciente:${req.params.id}`);
+    res.json({ paciente: pacRes.rows[0], consultas: consultasRes.rows, fichas: fichasRes.rows });
+  } catch (err) { next(err); }
+};
+
 // GET /pacientes/:id/link-consentimento
 // Gera um JWT de curta duração para o paciente assinar o termo LGPD
 exports.gerarLinkConsentimento = async (req, res, next) => {
