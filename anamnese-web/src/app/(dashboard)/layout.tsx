@@ -21,6 +21,7 @@ const TITULOS: Record<string, string> = {
   '/configuracoes/whatsapp':        'WhatsApp',
   '/configuracoes/usuarios':        'Equipe',
   '/assinatura':                    'Assinatura',
+  '/relatorios':                    'Relatórios',
 };
 
 const DIAS_PT = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];

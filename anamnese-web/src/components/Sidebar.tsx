@@ -14,15 +14,16 @@ import {
   UserCog,
   CreditCard,
   LogOut,
-  User,
+  BarChart2,
 } from 'lucide-react';
 
 const LINKS_PRINCIPAIS = [
-  { href: '/',                              label: 'Painel',          Icone: LayoutDashboard },
-  { href: '/agenda',                        label: 'Agenda',          Icone: CalendarDays    },
-  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade', Icone: Clock           },
-  { href: '/pacientes',                     label: 'Pacientes',       Icone: Users           },
-  { href: '/fichas',                        label: 'Fichas',          Icone: FileText        },
+  { href: '/',            label: 'Painel',          Icone: LayoutDashboard },
+  { href: '/agenda',      label: 'Agenda',          Icone: CalendarDays    },
+  { href: '/configuracoes/disponibilidade', label: 'Disponibilidade', Icone: Clock },
+  { href: '/pacientes',   label: 'Pacientes',       Icone: Users           },
+  { href: '/fichas',      label: 'Fichas',          Icone: FileText        },
+  { href: '/relatorios',  label: 'Relatórios',      Icone: BarChart2       },
 ];
 
 const LINKS_CONFIG = [

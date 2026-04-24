@@ -19,6 +19,7 @@ const procedimentosRoutes    = require('./routes/procedimentos');
 const consultasRoutes        = require('./routes/consultas');
 const disponibilidadeRoutes  = require('./routes/disponibilidade');
 const whatsappRoutes         = require('./routes/whatsapp');
+const relatoriosRoutes       = require('./routes/relatorios');
 const erros               = require('./middleware/erros');
 const scheduler           = require('./services/scheduler');
 
@@ -57,6 +58,7 @@ app.use('/procedimentos',   procedimentosRoutes);
 app.use('/consultas',       consultasRoutes);
 app.use('/disponibilidade', disponibilidadeRoutes);
 app.use('/whatsapp',       whatsappRoutes);
+app.use('/relatorios',     relatoriosRoutes);
 
 scheduler.iniciar();
 
