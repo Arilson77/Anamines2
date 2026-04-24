@@ -3,15 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev":    "next dev",
-    "build":  "next build",
-    "start":  "next start",
-    "lint":   "next lint",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "format": "prettier --write src"
   },
   "dependencies": {
     "@sentry/nextjs": "^8",
     "jose": "^5.9.6",
+    "lucide-react": "^1.9.0",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18"
