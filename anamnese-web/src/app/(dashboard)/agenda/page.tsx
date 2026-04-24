@@ -102,13 +102,13 @@ export default function AgendaPage() {
         </div>
 
         {/* Grade de horas */}
-        <div className="overflow-y-auto" style={{ maxHeight: '600px', paddingTop: '12px' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: '600px' }}>
           <div className="relative grid" style={{ gridTemplateColumns: '56px repeat(6, 1fr)', height: `${totalPx}px` }}>
             {/* Linhas de hora */}
             {horas.map(h => (
               <div key={h} className="absolute w-full border-t border-gray-100"
                 style={{ top: `${(h - HORA_INICIO) * PX_HORA}px` }}>
-                <span className="absolute left-1 -top-2.5 text-xs text-gray-400 w-12 text-right pr-2">
+                <span className="absolute left-1 top-1 text-xs text-gray-400 w-12 text-right pr-2">
                   {String(h).padStart(2,'0')}:00
                 </span>
               </div>
@@ -157,14 +157,14 @@ export default function AgendaPage() {
 
     return (
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-y-auto" style={{ maxHeight: '640px', paddingTop: '12px' }}>
+        <div className="overflow-y-auto" style={{ maxHeight: '640px' }}>
           <div className="relative flex" style={{ height: `${totalPx}px` }}>
             {/* Horas */}
             <div className="w-14 flex-shrink-0 border-r border-gray-100 relative">
               {horas.map(h => (
                 <div key={h} className="absolute w-full border-t border-gray-100"
                   style={{ top: `${(h - HORA_INICIO) * PX_HORA}px` }}>
-                  <span className="text-xs text-gray-400 absolute right-2 -top-2.5">
+                  <span className="text-xs text-gray-400 absolute right-2 top-1">
                     {String(h).padStart(2,'0')}:00
                   </span>
                 </div>
