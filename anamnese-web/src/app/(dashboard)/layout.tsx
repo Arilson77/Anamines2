@@ -31,7 +31,7 @@ function pad(n: number) { return String(n).padStart(2, '0'); }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [plano,   setPlano]   = useState<StatusPlano | null>(null);
-  const [agora,   setAgora]   = useState(new Date());
+  const [agora,   setAgora]   = useState<Date | null>(null);
   const [usuario, setUsuario] = useState<ReturnType<typeof obterUsuario>>(null);
   const pathname              = usePathname();
   useEffect(() => { setUsuario(obterUsuario()); }, []);
@@ -41,6 +41,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   useEffect(() => {
+    setAgora(new Date());
     const id = setInterval(() => setAgora(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
@@ -69,12 +70,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Data e hora — esquerda */}
           <div className="flex items-center gap-4">
             <div className="flex items-end gap-2">
-              <span className="text-5xl font-light text-teal-600 leading-none">{pad(agora.getDate())}</span>
+              <span className="text-5xl font-light text-teal-600 leading-none">{agora ? pad(agora.getDate()) : '--'}</span>
               <div className="pb-1">
-                <p className="text-sm font-semibold text-gray-700 leading-tight">{DIAS_PT[agora.getDay()]}</p>
-                <p className="text-xs text-gray-400">{MESES_PT[agora.getMonth()]}, {agora.getFullYear()}</p>
+                <p className="text-sm font-semibold text-gray-700 leading-tight">{agora ? DIAS_PT[agora.getDay()] : ''}</p>
+                <p className="text-xs text-gray-400">{agora ? `${MESES_PT[agora.getMonth()]}, ${agora.getFullYear()}` : ''}</p>
                 <p className="text-xs text-teal-500 font-mono">
-                  {pad(agora.getHours())}:{pad(agora.getMinutes())}:{pad(agora.getSeconds())}
+                  {agora ? `${pad(agora.getHours())}:${pad(agora.getMinutes())}:${pad(agora.getSeconds())}` : '--:--:--'}
                 </p>
               </div>
             </div>
