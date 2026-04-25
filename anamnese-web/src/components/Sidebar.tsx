@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { removerToken, obterUsuario } from '@/lib/auth';
 import {
@@ -38,7 +39,8 @@ const LINKS_CONFIG = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router   = useRouter();
-  const usuario  = obterUsuario();
+  const [usuario, setUsuario] = useState<ReturnType<typeof obterUsuario>>(null);
+  useEffect(() => { setUsuario(obterUsuario()); }, []);
   const isAdmin  = usuario?.papel === 'admin';
 
   function sair() {

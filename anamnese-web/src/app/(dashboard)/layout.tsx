@@ -30,10 +30,11 @@ const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho',
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [plano, setPlano]   = useState<StatusPlano | null>(null);
-  const [agora, setAgora]   = useState(new Date());
-  const pathname            = usePathname();
-  const usuario             = obterUsuario();
+  const [plano,   setPlano]   = useState<StatusPlano | null>(null);
+  const [agora,   setAgora]   = useState(new Date());
+  const [usuario, setUsuario] = useState<ReturnType<typeof obterUsuario>>(null);
+  const pathname              = usePathname();
+  useEffect(() => { setUsuario(obterUsuario()); }, []);
 
   useEffect(() => {
     api.get<StatusPlano>('/cobranca/status').then(setPlano).catch(() => null);
