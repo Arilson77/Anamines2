@@ -80,7 +80,7 @@ exports.prontuario = async (req, res, next) => {
         ORDER BY c.data_hora DESC
       `, [req.params.id]),
       client.query(`
-        SELECT id, criado_em, atualizado_em,
+        SELECT f.id, f.criado_em, f.atualizado_em,
           u.nome AS profissional_nome
         FROM fichas_anamnese f
         JOIN usuarios u ON u.id = f.profissional_id
