@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS tenants (
   id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nome                   TEXT NOT NULL,
   email                  TEXT NOT NULL UNIQUE,
-  plano                  TEXT NOT NULL DEFAULT 'trial', -- trial | basico | pro
+  plano                  TEXT NOT NULL DEFAULT 'trial', -- trial | basico | pro | clinica_s | clinica_m | clinica_l
   assinatura_status      TEXT NOT NULL DEFAULT 'trial', -- trial | ativa | expirada | cancelada
   trial_termina_em       TIMESTAMPTZ NOT NULL DEFAULT (now() + INTERVAL '14 days'),
   assinatura_termina_em  TIMESTAMPTZ,
@@ -25,7 +25,13 @@ ALTER TABLE tenants ADD COLUMN IF NOT EXISTS assinatura_termina_em  TIMESTAMPTZ;
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS stripe_customer_id     TEXT;
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS stripe_subscription_id TEXT;
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_aviso_enviado    BOOLEAN NOT NULL DEFAULT false;
-ALTER TABLE tenants ADD COLUMN IF NOT EXISTS limite_usuarios        INT NOT NULL DEFAULT 1;
+-- ⚙️ TRIAL_LIMITE_USUARIOS: altere o valor abaixo para ajustar o limite do plano trial.
+-- Para restringir a 1 profissional por tenant, mude para DEFAULT 1.
+-- Para testar com mais participantes, aumente o valor (ex: DEFAULT 10).
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS limite_usuarios        INT NOT NULL DEFAULT 5;
+
+-- Atualiza tenants trial já existentes que ainda estão com o limite antigo (1)
+UPDATE tenants SET limite_usuarios = 5 WHERE assinatura_status = 'trial' AND limite_usuarios = 1;
 
 -- =============================================
 -- 2. USUARIOS

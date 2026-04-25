@@ -45,6 +45,9 @@ exports.convidar = async (req, res, next) => {
     );
 
     const ocupados = parseInt(usuariosAtivos[0].total) + parseInt(convitesPendentes[0].total);
+    // ⚙️ TRIAL_LIMITE_USUARIOS: o limite vem do campo tenants.limite_usuarios (padrão: 5 no trial).
+    // Para testar sem limite: comente as 4 linhas abaixo.
+    // Para testar com limite menor: altere DEFAULT em schema.sql (linha com TRIAL_LIMITE_USUARIOS).
     if (ocupados >= tenant.limite_usuarios)
       return res.status(403).json({
         erro: `Seu plano permite até ${tenant.limite_usuarios} profissional(is). Faça upgrade para convidar mais.`,
